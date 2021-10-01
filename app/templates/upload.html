@@ -1,0 +1,22 @@
+<html>
+<head>
+  <title>Upload</title>
+  <meta charset="UTF-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/search.css') }}">
+</head>
+<body>
+
+<nav>
+  <a title="Search in database" class="upload-link" href="/search">+ Search</a>
+</nav>
+
+<form enctype="multipart/form-data">
+  <input type="file" id="file" accept="application/pdf" name="file" multiple>
+  <input type="submit" class="search" value="Upload" formmethod="post" formaction="">
+</form>
+
+</body>
+</html>
+
