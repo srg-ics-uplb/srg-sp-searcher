@@ -85,7 +85,7 @@ def get_results(words, page=0, nb_max_by_pages=3, nb_min_pdfs=3):
     start_time = time()
     # a pdf_score is calculated  with sum(tf-idf) of words matched time the number of different words matched on the pdf
     cursor = conn.execute("""
-        SELECT PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE
+        SELECT PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH
         FROM (SELECT PDF_ID, WORD, W_FREQ
               FROM FREQ
               WHERE WORD IN ({}))
@@ -94,7 +94,7 @@ def get_results(words, page=0, nb_max_by_pages=3, nb_min_pdfs=3):
               FROM FREQ WHERE W2 IN ({})
               GROUP BY W2) ON WORD = W2
           INNER JOIN
-             (SELECT ID, NAME, DATE
+             (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH
               FROM PDF) ON ID = PDF_ID
         GROUP BY PDF_ID
         ORDER BY SCORE DESC
@@ -107,7 +107,11 @@ def get_results(words, page=0, nb_max_by_pages=3, nb_min_pdfs=3):
     for i, row in enumerate(cursor):
         pdfs.append({"pdf_name" : row[1],
                      "date"     : format(datetime.fromtimestamp(row[2]), '%d/%m/%Y'),
-                     "score"    : row[4] * 100})
+                     "score"    : row[4] * 100,
+                     "title"     : row[5],
+                     "authors"  : row[6],
+                     "year"     : row[7],
+                     "month"    : row[8]})
     conn.close()
 
     if len(pdfs) == nb_max_by_pages:

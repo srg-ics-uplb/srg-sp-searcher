@@ -23,7 +23,7 @@
 <div class="result">
   <div>
     <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
-      {{ row["pdf_name"] }}
+      {{ row["title"] }}
     </a>
   </div>
 
@@ -32,7 +32,7 @@
   </div>
 
   <div class="result__description">
-    Year : {{ row["year"] }}, Month : {{ row["score"] }}
+    Year : {{ row["year"] }}, Month : {{ row["month"] }}, Score: {{row["score"]}}
   </div>
 </div>
 {% endfor %}
