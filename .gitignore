@@ -1,5 +1,4 @@
 app/__pycache__/
-app/static/pdf
 app/sql/pdf.db
 app/sql/users.db
 .keep
