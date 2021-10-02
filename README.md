@@ -8,8 +8,8 @@ based on https://github.com/VieVie31/podofo
 2. `pip install -r requirements`
 3. `export PATH=$PATH:$HOME/.local/bin`
 
-## Start Flask
+## Run App
 
-1. `flask run`
+1. `flask run --host=0.0.0.0`
 
 
