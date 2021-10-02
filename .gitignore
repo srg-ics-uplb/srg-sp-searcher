@@ -1,3 +1,4 @@
 app/__pycache__/
-./app/static/pdf
-./app/sql/pdf.db
+app/static/pdf
+app/sql/pdf.db
+.keep
