@@ -4,12 +4,13 @@ based on https://github.com/VieVie31/podofo
 
 ## Installation
 
-0. `git clone https://github.com/srg-ics-uplb/srg-tr-searcher`
-1. `sudo apt install python3-pip sqlite3`
-2. `pip install -r requirements.txt`
-3. `export PATH=$PATH:$HOME/.local/bin`
-4. `mkdir app/static/pdf`
-5. `./reset.sh`
+1. `git clone https://github.com/srg-ics-uplb/srg-tr-searcher`
+2. `cd srg-tr-searcher`
+3. `sudo apt install python3-pip sqlite3`
+4. `pip install -r requirements.txt`
+5. `export PATH=$PATH:$HOME/.local/bin`
+6. `mkdir app/static/pdf`
+7. `./reset.sh`
 
 ## Run App
 
