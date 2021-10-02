@@ -7,7 +7,7 @@ based on https://github.com/VieVie31/podofo
 1. `sudo apt install python3-pip sqlite3`
 2. `pip install -r requirements`
 3. `export PATH=$PATH:$HOME/.local/bin`
-4. `mkdir app/pdf`
+4. `./reset.sh`
 
 ## Run App
 
