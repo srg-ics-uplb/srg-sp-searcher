@@ -28,10 +28,15 @@ def search_page():
     query = query.lower()
     #query = unicodedata.normalize('NFKD', query).encode('ASCII', 'ignore')
     words = query.split()[:5] #max 5 words for querying...
-    words = map(secure_filename, words)
-    query = " ".join(words)
 
-    words = map(lemmatize, words)
+    #words = map(secure_filename, words)
+
+    query = " ".join(words)
+    
+
+    #words = map(lemmatize, words)
+    
+    print(words)
 
     if not words:
         return render_template('search.html')

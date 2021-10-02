@@ -27,8 +27,8 @@ from nltk import PorterStemmer
 stemmer = PorterStemmer()
 
 def lemmatize(word):
-#    return stemmer.stem(word, 0, len(word) - 1)
-    return stemmer.stem(word)
+    return stemmer.stem(word, 0, len(word) - 1)
+    #return stemmer.stem(word)
 
 def conn_to_db(db_name):
     conn = sqlite3.connect(app.config['DB_PATH'] + db_name)
@@ -75,9 +75,10 @@ def count_pdf():
     conn.close() #just in case...
     return 0
 
-def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
+def get_results(words, page=0, nb_max_by_pages=3, nb_min_pdfs=3):
     nb_pdf = count_pdf()
     ws = "'" + "','".join(words) + "'"
+    print(list(words))
 
     conn = conn_to_db('pdf.db')
 
@@ -113,8 +114,6 @@ def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
         return pdfs, end_time - start_time, True #pdfs list, time took to process and True for telling to display a "next button"
 
     conn = conn_to_db('pdf.db')
-    #cursor = conn.execute("SELECT NAME, DATE FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
-    #TODO: Impolement proper search
     cursor = conn.execute("SELECT NAME, DATE, TITLE, AUTHORS, YEAR, MONTH FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
     conn.commit()
 
