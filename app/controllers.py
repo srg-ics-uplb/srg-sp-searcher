@@ -113,11 +113,19 @@ def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
         return pdfs, end_time - start_time, True #pdfs list, time took to process and True for telling to display a "next button"
 
     conn = conn_to_db('pdf.db')
-    cursor = conn.execute("SELECT NAME, DATE FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
+    #cursor = conn.execute("SELECT NAME, DATE FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
+    #TODO: Impolement proper search
+    cursor = conn.execute("SELECT NAME, DATE, TITLE, AUTHORS, YEAR, MONTH FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
     conn.commit()
 
     for row in cursor:
-        pdfs.append({"pdf_name" : row[0], "date" : format(datetime.fromtimestamp(row[1]), '%d/%m/%Y'), "score" : 0})
+        pdfs.append({   "pdf_name"  : row[0], 
+                        "date"      : format(datetime.fromtimestamp(row[1]), '%d/%m/%Y'),
+                        "title"     : row[2],
+                        "authors"   : row[3],
+                        "year"      : row[4],
+                        "month"     : row[5],  
+                        "score" : 0})
 
     conn.close()
     return pdfs, end_time - start_time, False #pdfs list, time took to process and False for telling to not display a "next button"

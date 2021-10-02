@@ -23,17 +23,16 @@
 <div class="result">
   <div>
     <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
-      {{ "_".join(row["pdf_name"].split("_")[1:]) }}
+      {{ row["title"] }}
     </a>
   </div>
 
   <div class="result__url">
-    <span>/pdf/</span>
-    <strong>{{ row["pdf_name"] }}</strong>
+    <strong>{{ row["authors"] }}</strong>
   </div>
 
   <div class="result__description">
-    Score : {{ row["score"] }}, Imported on : {{ row["date"] }}
+    Year : {{ row["year"] }}, Month : {{ row["month"] }}
   </div>
 </div>
 {% endfor %}
