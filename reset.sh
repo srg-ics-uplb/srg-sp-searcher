@@ -4,7 +4,7 @@ echo "Press CTRL+c to cancel or ENTER to continue."
 read
 
 DBPATH=./app/sql
-PDFPATH=./app/pdf
+PDFPATH=./app/static/pdf
 PDFDB=$DBPATH/pdf.db
 USERSDB=$DBPATH/users.db
 
