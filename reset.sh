@@ -1,5 +1,8 @@
+#!/bin/bash
+#by jachermocilla@gmail.com
+
 echo "!!!WARNING!!!"
-echo "This will erase the database and the uploaded PDFs!"
+echo "This will reinitialize the database and delete the uploaded PDFs!"
 echo "Press CTRL+c to cancel or ENTER to continue."
 read
 
