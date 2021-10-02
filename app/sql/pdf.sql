@@ -2,7 +2,11 @@ CREATE TABLE PDF (
   ID INTEGER PRIMARY KEY AUTOINCREMENT,
   NAME           TEXT    NOT NULL,
   HASH           TEXT    NOT NULL,
-  DATE           INT     NOT NULL
+  DATE           INT     NOT NULL,
+  TITLE          TEXT    NOT NULL,
+  AUTHORS        TEXT    NOT NULL,
+  YEAR           TEXT    NOT NULL,
+  MONTH          TEXT    NOT NULL
 );
 
 CREATE TABLE FREQ (

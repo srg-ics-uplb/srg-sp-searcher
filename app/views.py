@@ -59,6 +59,15 @@ def uploaded_page():
         if len(listdir(app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'])) > 200:
             return "Too many pdf all ready uploaded..."
 
+        title = request.form['title']
+        print(title)
+        authors = request.form['authors']
+        print(authors)
+        year = request.form['year']
+        print(year)
+        month = request.form['month']
+        print(month)
+
         uploaded_file = request.files['file']
         file_name = uploaded_file.filename
 
@@ -95,7 +104,7 @@ def uploaded_page():
             print(traceback.format_exc())
             return "This is not a pdf... <a href='/search'>search</a>." 
 
-        pdf_id = insert_pdf_to_db(file_name) #add the pdf to the database 
+        pdf_id = insert_pdf_to_db(file_name,title,authors,year,month) #add the pdf to the database 
         total_words = sum(counter.values())
         for word in counter: #update the words in database
             insert_word_to_db(pdf_id, word, counter[word] / float(total_words))

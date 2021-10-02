@@ -12,9 +12,16 @@
   <a title="Search in database" class="upload-link" href="/search">+ Search</a>
 </nav>
 
+
 <form enctype="multipart/form-data">
-  <input type="file" id="file" accept="application/pdf" name="file" multiple>
-  <input type="submit" class="search" value="Upload" formmethod="post" formaction="">
+  <table>
+  <tr><td><input type="text" id="title" name="title" required minlength="4" maxlength="200" size="50" placeholder="Title"></td></tr>
+  <tr><td><input type="text" id="authors" name="authors" required minlength="4" maxlength="200" size="50" placeholder="Authors (comma seperated)"></td></tr>
+  <tr><td><input type="text" id="year" name="year" required minlength="4" maxlength="200" size="50" placeholder="Year"></td></tr>
+  <tr><td><input type="text" id="month" name="month" required minlength="4" maxlength="200" size="50" placeholder="Month"></td></tr>
+  <tr><td><input type="file" id="file" accept="application/pdf" name="file" multiple></td></tr>
+  <tr><td><input type="submit" class="search" value="Upload" formmethod="post" formaction=""></td></tr>
+  </table>
 </form>
 
 </body>
