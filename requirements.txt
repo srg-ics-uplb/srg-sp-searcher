@@ -2,3 +2,4 @@ flask
 nltk
 pdfminer
 pdfminer.six
+gunicorn
