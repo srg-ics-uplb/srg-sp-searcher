@@ -84,16 +84,12 @@ def uploaded_page():
     # FIXME : this function is too long (in lines and speed) !! use a thread ?
     try:
         if len(listdir(app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'])) > 200:
-            return "Too many pdf all ready uploaded..."
+            return "Too many pdf already uploaded...max is 200"
 
         title = request.form['title']
-        print(title)
         authors = request.form['authors']
-        print(authors)
         year = request.form['year']
-        print(year)
         month = request.form['month']
-        print(month)
 
         uploaded_file = request.files['file']
         file_name = uploaded_file.filename
@@ -119,13 +115,14 @@ def uploaded_page():
             #adding the file name to the text for searching by file name...
             #norm_filnam = normalize_txt(file_name.replace('_', ' ').replace('.', ' ').replace('-', ' '))
             #txt = read_as_txt(pdf_path) + " " + norm_filnam
-            txt = read_as_txt(pdf_path)
+            txt = read_as_txt(pdf_path) + " " + title + " " + authors + " " + year + " " + month
 
             if not txt:
                 remove(pdf_path)
                 return "We cann't extract nothing from this pdf... <a href='/search'>search</a>."
 
             counter = get_word_cout(txt)
+
         except:
             remove(pdf_path)
             print(traceback.format_exc())
@@ -137,7 +134,7 @@ def uploaded_page():
             insert_word_to_db(pdf_id, word, counter[word] / float(total_words))
         return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdf_id))
     except:
-        return "Fail to upload"
+        return "Fail to uploadi."
 
 
 @app.route('/pdf/<pdf_name>')
