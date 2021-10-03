@@ -9,4 +9,4 @@ USERSDB=$DBPATH/users.db
 
 echo "Creating a backup..."
 BACKUP="tr-searcher-backup-$(date '+%F_%H-%M-%S').tar.gz"
-
+tar czvf $BACKUP $DBPATH $PDFPATH
