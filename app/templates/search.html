@@ -15,12 +15,16 @@
 {% endif %}
 
 <form>
-  <input type="text" name="s">
-  <input type="submit" class="search" value="Search" formmethod="get">
+  <table>
+  <tr><td><input type="text" name="s"></td>
+  <td><input type="submit" class="search" value="Search" formmethod="get"></td>
+  </tr>
+  <tr><td colspan="2">There are <strong>{{ count_pdf }} </strong> technical reports available.</td></tr>
+  </table> 
 </form>
 
 <footer class="footer-info">
-  There are actually <strong>{{ count_pdf }} </strong>pdfs uploaded here.<br>
+   &#169; 2021 <a href="https://sites.google.com/up.edu.ph/systems-research">SRG-ICS-UPLB</a>
 </footer>
 
 </body>
