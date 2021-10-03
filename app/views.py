@@ -23,8 +23,8 @@ def verify_password(username, password):
         return check_password_hash(users.get(username), password)
     return False
 
-user = 'jane.doe@email.com'
-pw = '1234xyz'
+user = app.config["USERNAME"]
+pw = app.config["PASSWORD"]
 
 users = {
     user: generate_password_hash(pw)
@@ -69,12 +69,14 @@ def search_page():
     return render_template('results.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
 
 @app.route('/upload', methods=['GET'])
+@auth.login_required
 def upload_page():
     if not app.config['ALLOW_UPLOAD']:
         return render_template('search.html')
     return render_template('upload.html')
 
 @app.route('/upload', methods=['POST'])
+@auth.login_required
 def uploaded_page():
     if not app.config['ALLOW_UPLOAD']:
         return render_template('search.html')
@@ -139,6 +141,7 @@ def uploaded_page():
 
 
 @app.route('/pdf/<pdf_name>')
+@auth.login_required
 def return_pdf(pdf_name):
     try:
         return redirect(url_for('static', filename=app.config['PDF_DIR'] + secure_filename(pdf_name)))
