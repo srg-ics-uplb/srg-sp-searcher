@@ -72,7 +72,7 @@ form {
           transform: translateZ(0);
 }
 
-form input[type="text"], form input[type="file"], input[type="number"] {
+form input[type="text"], form input[type="file"], input[type="number"], select {
   -webkit-box-flex: 1;
   -webkit-flex: 1;
       -ms-flex: 1;
