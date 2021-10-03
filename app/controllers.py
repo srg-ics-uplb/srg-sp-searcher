@@ -75,7 +75,7 @@ def count_pdf():
     conn.close() #just in case...
     return 0
 
-def get_results(words, page=0, nb_max_by_pages=3, nb_min_pdfs=3):
+def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
     nb_pdf = count_pdf()
     ws = "'" + "','".join(words) + "'"
     print(list(words))
