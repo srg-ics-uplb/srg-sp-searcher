@@ -2,4 +2,5 @@ flask
 nltk
 pdfminer
 pdfminer.six
+flask-httpauth
 gunicorn

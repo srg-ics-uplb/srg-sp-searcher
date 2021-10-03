@@ -7,12 +7,32 @@ from . controllers import *
 import traceback 
 import sys
 
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import generate_password_hash, check_password_hash
+
 import io
 import random
 import unicodedata
 
+
+auth = HTTPBasicAuth()
+
+@auth.verify_password
+def verify_password(username, password):
+    if username in users:
+        return check_password_hash(users.get(username), password)
+    return False
+
+user = 'jane.doe@email.com'
+pw = '1234xyz'
+
+users = {
+    user: generate_password_hash(pw)
+}
+
 @app.route('/', methods=['GET'])
 @app.route('/search', methods=['GET'])
+@auth.login_required
 def search_page():
     query = request.args.get('s')
     page  = request.args.get('p')
