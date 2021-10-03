@@ -15,12 +15,28 @@
 
 <form enctype="multipart/form-data">
   <table>
-  <tr><td><input type="text" id="title" name="title" required minlength="4" maxlength="200" size="50" placeholder="Title"></td></tr>
-  <tr><td><input type="text" id="authors" name="authors" required minlength="4" maxlength="200" size="50" placeholder="Authors (comma seperated)"></td></tr>
-  <tr><td><input type="text" id="year" name="year" required minlength="4" maxlength="200" size="50" placeholder="Year"></td></tr>
-  <tr><td><input type="text" id="month" name="month" required minlength="4" maxlength="200" size="50" placeholder="Month"></td></tr>
+  <tr><td><input type="text" id="title" name="title" required minlength="4" maxlength="200" size="60" placeholder="Title"></td></tr>
+  <tr><td><input type="text" id="authors" name="authors" required minlength="4" maxlength="200" size="60" placeholder="Authors (comma seperated)"></td></tr>
+  <tr><td><input type="number" id="year" name="year" required minlength="4" maxlength="200" size="60" placeholder="Year"></td></tr>
+  <tr><td>
+     <select id="month" name="month" required >
+     <option value="None">Select Month</option>
+     <option value="January">January</option>
+     <option value="February">February</option>
+     <option value="March">March</option>
+     <option value="April">April</option>
+     <option value="May">May</option>
+     <option value="June">June</option>
+     <option value="July">July</option>
+     <option value="August">August</option>
+     <option value="September">September</option>
+     <option value="October">October</option>
+     <option value="November">November</option>
+     <option value="December">December</option>
+     </select>
+  </td></tr>
   <tr><td><input type="file" id="file" accept="application/pdf" name="file" multiple></td></tr>
-  <tr><td><input type="submit" class="search" value="Upload" formmethod="post" formaction=""></td></tr>
+  <tr><td align="center"><input type="submit" class="search" value="Upload" formmethod="post" formaction=""></td></tr>
   </table>
 </form>
 
