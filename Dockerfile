@@ -11,5 +11,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app ./app
 
 #CMD [ "flask", "run" ,"--host=0.0.0.0"]
-CMD [ "gunicorn","-b", "0.0.0.0:5000", "app:app","--timeout","3600"]
+CMD [ "gunicorn","-b", "0.0.0.0:5000", "app:app","--timeout","3600","--workers=5","--threads=2"]
 #CMD ["tail","-f","/dev/null"]
