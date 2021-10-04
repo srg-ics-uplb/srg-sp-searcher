@@ -12,8 +12,10 @@ based on https://github.com/VieVie31/podofo
 6. `mkdir app/static/pdf`
 7. `./reset.sh`
 
-## Run App
+## Configuration
+1. Set the username and password in the creds.py
+2. To allow appload set `app.config['ALLOW_UPLOAD'] = True` in app/__init__.py
 
+## Running the app locally
 1. `flask run --host=0.0.0.0`
-
-
+2. Open the `http://127.0.0.1:5000` in browser
