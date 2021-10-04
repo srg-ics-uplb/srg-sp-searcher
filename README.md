@@ -14,7 +14,7 @@ based on https://github.com/VieVie31/podofo
 
 ## Configuration
 1. Set the username and password in the `app/creds.py`
-2. To allow appload set `app.config['ALLOW_UPLOAD'] = True` in `app/__init__.py`
+2. To allow upload set `app.config['ALLOW_UPLOAD'] = True` in `app/__init__.py`
 
 ## Running the app locally
 1. `flask run --host=0.0.0.0`
