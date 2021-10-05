@@ -4,7 +4,7 @@ Useful for setting up a repository of technical reports for a research group.
 
 Credits to: https://github.com/VieVie31/podofo
 
-## Installation
+## Install
 
 1. `git clone https://github.com/srg-ics-uplb/srg-tr-searcher`
 2. `cd srg-tr-searcher`
@@ -14,18 +14,18 @@ Credits to: https://github.com/VieVie31/podofo
 6. `mkdir app/static/pdf`
 7. `./reset.sh`
 
-## Configuration
+## Configure
 1. Set the username and password in `app/creds.py`
 2. To allow upload set `app.config['ALLOW_UPLOAD'] = True` in `app/__init__.py`
 
-## Running the app locally
+## Run
 Useful for development and testing as well as uploading.
 
 1. `gunicorn -c gunicorn_config.py app:app`
 2. Open `http://127.0.0.1:5000` in browser
 3. Check the `access.log` and `error.log` files 
 
-## Deploying the app
+## Deploy
 Docker is the best way to deploy the app.
 
 1.  Set a strong the username and password in `app/creds.py`
