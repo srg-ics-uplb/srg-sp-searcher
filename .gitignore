@@ -4,3 +4,5 @@ app/static/pdf
 app/sql/pdf.db
 app/sql/users.db
 .keep
+access.log
+error.log

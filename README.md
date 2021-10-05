@@ -17,5 +17,6 @@ based on https://github.com/VieVie31/podofo
 2. To allow upload set `app.config['ALLOW_UPLOAD'] = True` in `app/__init__.py`
 
 ## Running the app locally
-1. `flask run --host=0.0.0.0`
+1. `gunicorn -c gunicorn_config.py app:app`
 2. Open `http://127.0.0.1:5000` in browser
+3. Check the `access.log` and `error.log` files 
