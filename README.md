@@ -28,8 +28,9 @@ Useful for development and testing as well as uploading.
 ## Deploying the app
 Docker is the best way to deploy the app.
 
-1.  Disable upload by setting `app.config['ALLOW_UPLOAD'] = False` in `app/__init__.py`
-2. `docker-compose build`
-3. `DOCKER_HOST="ssh://remote.docker.host" docker-compose up -d`
+1.  Set a strong the username and password in `app/creds.py`
+2.  Disable upload by setting `app.config['ALLOW_UPLOAD'] = False` in `app/__init__.py`
+3. `docker-compose build`
+4. `DOCKER_HOST="ssh://remote.docker.host" docker-compose up -d`
 
 
