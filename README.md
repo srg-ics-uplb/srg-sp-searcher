@@ -9,6 +9,8 @@ Must be available on the dev/prod box.
 1. Python3
 2. Pip
 3. SQLite3
+4. Docker
+5. docker-compose
 
 In Ubuntu 20.04: `sudo apt install python3-pip sqlite3`
 
