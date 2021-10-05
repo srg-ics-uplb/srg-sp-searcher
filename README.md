@@ -29,6 +29,6 @@ Useful for debugging and uploading.
 Docker is the best way to deploy the app.
 
 1. `docker-compose build`
-2. `DOCKER_HOST="ssh://docker.host.server" docker-compose up -d`
+2. `DOCKER_HOST="ssh://remote.docker.host" docker-compose up -d`
 
 
