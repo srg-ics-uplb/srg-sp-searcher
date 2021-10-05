@@ -4,15 +4,22 @@ Useful for setting up a repository of technical reports for a research group.
 
 Credits to: https://github.com/VieVie31/podofo
 
+## Dependencies
+Must be available on the dev/prod box.
+1. Python3
+2. Pip
+3. SQLite3
+
+In Ubuntu 20.04: `sudo apt install python3-pip sqlite3`
+
 ## Install
 
 1. `git clone https://github.com/srg-ics-uplb/srg-tr-searcher`
 2. `cd srg-tr-searcher`
-3. `sudo apt install python3-pip sqlite3`
-4. `pip install -r requirements.txt`
-5. `export PATH=$PATH:$HOME/.local/bin`
-6. `mkdir app/static/pdf`
-7. `./reset.sh`
+3. `pip install -r requirements.txt`
+4. `export PATH=$PATH:$HOME/.local/bin`
+5. `mkdir app/static/pdf`
+6. `./reset.sh`
 
 ## Populate
 1. Set the username and password in `app/creds.py`
