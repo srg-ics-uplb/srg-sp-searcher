@@ -13,7 +13,7 @@ based on https://github.com/VieVie31/podofo
 7. `./reset.sh`
 
 ## Configuration
-1. Set the username and password in the `app/creds.py`
+1. Set the username and password in `app/creds.py`
 2. To allow upload set `app.config['ALLOW_UPLOAD'] = True` in `app/__init__.py`
 
 ## Running the app locally
@@ -24,7 +24,7 @@ Useful for debugging and uploading.
 3. Check the `access.log` and `error.log` files 
 
 ## Deploying the app
-Docker is the best way to deploy the app
+Docker is the best way to deploy the app.
 
 1. `docker-compose build`
 2. `DOCKER_HOST="ssh://dockeri.host.server" docker-compose up -d`
