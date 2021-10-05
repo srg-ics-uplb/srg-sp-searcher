@@ -3,6 +3,7 @@
 
 echo "!!!WARNING!!!"
 echo "This will reinitialize the database and delete the uploaded PDFs!"
+echo "You might want to create a backup first using backup.sh"
 echo "Press CTRL+c to cancel or ENTER to continue."
 read
 
