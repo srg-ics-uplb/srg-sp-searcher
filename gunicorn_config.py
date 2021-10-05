@@ -10,8 +10,8 @@ user = None
 group = None
 tmp_upload_dir = None
 
-accesslog = '-'  #logging on stdout
-errorlog = '-'   #logging on stdout
+#accesslog = '-'  #logging on stdout
+#errorlog = '-'   #logging on stdout
 accesslog = 'access.log'
 errorlog = 'error.log'
 loglevel = 'info'
