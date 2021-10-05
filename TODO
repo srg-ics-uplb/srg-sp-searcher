@@ -2,3 +2,4 @@
 * [x] Include whole directory in backup.sh
 * [x] Protect static directory with http basic auth
 * [] Update Terms of Use and Privacy Policy
+* [] Make the HTML templates mobile-friendly
