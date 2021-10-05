@@ -5,7 +5,7 @@ from time import time
 from os import listdir, remove, getcwd
 from . controllers import *
 import traceback 
-import sys
+import sys, os
 
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -29,6 +29,17 @@ pw = app.config["PASSWORD"]
 users = {
     user: generate_password_hash(pw)
 }
+
+
+@app.route('/static/pdf/<path:filename>')
+@auth.login_required
+def protected(filename):
+    pdf_file=os.path.join(app.root_path,'static',app.config['PDF_DIR'])
+    #pdf_file=os.path.join(app.instance_path,'static',app.config['PDF_DIR'])
+
+    print(pdf_file,filename)
+    return send_from_directory(pdf_file,filename)
+
 
 @app.route('/', methods=['GET'])
 @app.route('/search', methods=['GET'])
