@@ -1,6 +1,8 @@
 # SRG Technical Reports Searcher
 
-based on https://github.com/VieVie31/podofo
+Useful for setting up a repository of technical reports for a research group.
+
+Credits to: https://github.com/VieVie31/podofo
 
 ## Installation
 
@@ -27,6 +29,6 @@ Useful for debugging and uploading.
 Docker is the best way to deploy the app.
 
 1. `docker-compose build`
-2. `DOCKER_HOST="ssh://dockeri.host.server" docker-compose up -d`
+2. `DOCKER_HOST="ssh://docker.host.server" docker-compose up -d`
 
 
