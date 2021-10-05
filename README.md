@@ -6,9 +6,9 @@ Credits to: https://github.com/VieVie31/podofo
 
 ## Dependencies
 Must be available on the dev/prod box.
-1. Python3
+1. Python 3
 2. Pip
-3. SQLite3
+3. SQLite 3
 4. Docker
 5. docker-compose
 
