@@ -19,7 +19,7 @@ Credits to: https://github.com/VieVie31/podofo
 2. To allow upload set `app.config['ALLOW_UPLOAD'] = True` in `app/__init__.py`
 
 ## Running the app locally
-Useful for debugging and uploading.
+Useful for development and testing as well as uploading.
 
 1. `gunicorn -c gunicorn_config.py app:app`
 2. Open `http://127.0.0.1:5000` in browser
