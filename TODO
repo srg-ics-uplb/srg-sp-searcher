@@ -1,3 +1,4 @@
 * [x] Configure logging for gunicorn
-* [] Include whole directory in backup.sh
+* [x] Include whole directory in backup.sh
 * [x] Protect static directory with http basic auth
+* [] Update Terms of Use and Privacy Policy
