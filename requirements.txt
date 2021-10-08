@@ -4,3 +4,6 @@ pdfminer
 pdfminer.six
 flask-httpauth
 gunicorn
+pillow
+qrcode
+pymupdf

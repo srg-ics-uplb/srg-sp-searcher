@@ -3,9 +3,13 @@ from werkzeug.utils import secure_filename
 from app import app
 from time import time
 from os import listdir, remove, getcwd
-from . controllers import *
+from time import gmtime, strftime
 import traceback 
 import sys, os
+import qrcode
+import fitz
+
+from . controllers import *
 
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -152,8 +156,43 @@ def uploaded_page():
 @auth.login_required
 def return_pdf(pdf_name):
     try:
+        download_date=strftime("%Y-%m-%d %H:%M:%S", gmtime())        
+        input_data=request.base_url+" "+download_date
+        print(input_data)
+
+        qr = qrcode.QRCode(
+            version=1,
+            box_size=2,
+            border=5)
+        qr.add_data(input_data)
+        qr.make(fit=True)
+
+        img = qr.make_image(fill='black', back_color='white')
+        img.save('qrcode001.png') 
+
+        input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
+        print(input_file)
+        output_file = "example-with-barcode.pdf"
+        barcode_file = "qrcode001.png"
+
+        # define the position (upper-right corner)
+        image_rectangle = fitz.Rect(530,2,610,82)
+
+        # retrieve the first page of the PDF
+        file_handle = fitz.open(input_file)
+        first_page = file_handle[0]
+
+        img=open(barcode_file, "rb").read()
+
+        # add the image
+        first_page.insertImage(image_rectangle, stream=img)
+
+        file_handle.save(output_file)
+        file_handle.close()
+
         return redirect(url_for('static', filename=app.config['PDF_DIR'] + secure_filename(pdf_name)))
     except:
+        print(traceback.format_exc())
         abort(404)
 
 

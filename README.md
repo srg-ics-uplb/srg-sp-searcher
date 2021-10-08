@@ -29,11 +29,12 @@ In Ubuntu 20.04: `sudo apt install python3-pip sqlite3`
 3. `gunicorn -c gunicorn_config.py app:app`
 4. Open `http://127.0.0.1:5000` in browser
 5. Check `access.log` and `error.log` files 
+6. Add contents through the upload link
 
 ## Deploy
 Docker is the best way to deploy the app.
 
-1.  Set a strong the username and password in `app/creds.py`
+1.  Set a strong username and password in `app/creds.py`
 2.  Disable upload by setting `app.config['ALLOW_UPLOAD'] = False` in `app/__init__.py`
 3. `docker-compose build`
 4. `DOCKER_HOST="ssh://remote.docker.host" docker-compose down`
