@@ -36,8 +36,8 @@ Docker is the best way to deploy the app.
 
 1.  Set a strong username and password in `app/creds.py`
 2.  Disable upload by setting `app.config['ALLOW_UPLOAD'] = False` in `app/__init__.py`
-3. `DOCKER_HOST="ssh://remote.docker.host" docker-compose build`
-4. `DOCKER_HOST="ssh://remote.docker.host" docker-compose down`
-4. `DOCKER_HOST="ssh://remote.docker.host" docker-compose up -d`
+3. `DOCKER_HOST="ssh://remote.docker.host" docker-compose down`
+4. `DOCKER_HOST="ssh://remote.docker.host" docker-compose build`
+5. `DOCKER_HOST="ssh://remote.docker.host" docker-compose up -d`
 
 
