@@ -7,3 +7,4 @@ gunicorn
 pillow
 qrcode
 pymupdf
+pytz

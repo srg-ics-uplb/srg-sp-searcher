@@ -2,5 +2,6 @@
 * [x] Include whole directory in backup.sh
 * [x] Protect static directory with http basic auth
 * [x] Update Terms of Use and Privacy Policy
+* [x] Add QR code with URL and download date/time
 * [] Make the HTML templates mobile-friendly
 * [] Allow searching on title, authors, and year fields

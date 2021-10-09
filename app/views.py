@@ -8,6 +8,8 @@ import traceback
 import sys, os
 import qrcode
 import fitz
+import tempfile
+import pytz
 
 from . controllers import *
 
@@ -156,7 +158,8 @@ def uploaded_page():
 @auth.login_required
 def return_pdf(pdf_name):
     try:
-        download_date=strftime("%Y-%m-%d %H:%M:%S", gmtime())        
+        datetime_ph = datetime.now(pytz.timezone('Asia/Manila'))
+        download_date=datetime_ph.strftime("%Y-%m-%d %H:%M:%S %Z %z" )        
         input_data=request.base_url+" "+download_date
         print(input_data)
 
@@ -166,14 +169,12 @@ def return_pdf(pdf_name):
             border=5)
         qr.add_data(input_data)
         qr.make(fit=True)
-
         img = qr.make_image(fill='black', back_color='white')
-        img.save('qrcode001.png') 
+        qrcode_filename=make_temp_file("qrcode.png")
+        img.save(qrcode_filename) 
 
         input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
         print(input_file)
-        output_file = "example-with-barcode.pdf"
-        barcode_file = "qrcode001.png"
 
         # define the position (upper-right corner)
         image_rectangle = fitz.Rect(530,2,610,82)
@@ -182,17 +183,24 @@ def return_pdf(pdf_name):
         file_handle = fitz.open(input_file)
         first_page = file_handle[0]
 
-        img=open(barcode_file, "rb").read()
+        img=open(qrcode_filename, "rb").read()
 
         # add the image
         first_page.insertImage(image_rectangle, stream=img)
-
-        file_handle.save(output_file)
+        
+        return_filename = make_temp_file(secure_filename(pdf_name))
+        file_handle.save(return_filename)
         file_handle.close()
 
-        return redirect(url_for('static', filename=app.config['PDF_DIR'] + secure_filename(pdf_name)))
+
+#        return redirect(url_for('static', filename=app.config['PDF_DIR'] + secure_filename(pdf_name)))
+        #return send_file(temp.name,as_attachment=True)
+        return send_file(return_filename,as_attachment=True)
     except:
         print(traceback.format_exc())
         abort(404)
 
+def make_temp_file(suffix):
+        temp = tempfile.NamedTemporaryFile()
+        return temp.name+"_"+suffix
 
