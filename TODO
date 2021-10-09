@@ -7,4 +7,5 @@
 * [] Allow searching on title, authors, and year fields
 * [] Generate downloadable bibtex entry in results page
 * [] Set up log rotation for access.log
-* [] Create basic stats page 
+* [x] Create basic stats script
+* [] Convert UPLOAD mode to ADMIN mode and add delete route
