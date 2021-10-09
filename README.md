@@ -32,13 +32,17 @@ In Ubuntu 20.04: `sudo apt install python3-pip sqlite3`
 6. Add contents through the upload link
 
 ## Deploy
-Docker is the best way to deploy the app.
+Docker is the best way to deploy the app. This assumes that the remote docker 
+host is configured for passwordless access.
 
 1.  Set a strong username and password in `app/creds.py`
 2.  Disable upload by setting `app.config['ALLOW_UPLOAD'] = False` in `app/__init__.py`
 3. `DOCKER_HOST="ssh://remote.docker.host" docker-compose down`
 4. `DOCKER_HOST="ssh://remote.docker.host" docker-compose build`
 5. `DOCKER_HOST="ssh://remote.docker.host" docker-compose up -d`
-6. Get a shell: `DOCKER_HOST="ssh://peak-one.ics.uplb.edu.ph" docker-compose exec flask sh`
+
+## Monitor
+6. Get a shell: `DOCKER_HOST="ssh://remote.docker.host" docker-compose exec flask bash`
+7. Download access log: `DOCKER_HOST="ssh://remote.docker.host" docker cp srg-tr-searcher:/usr/src/access.log access_for_stats.log`
 
 
