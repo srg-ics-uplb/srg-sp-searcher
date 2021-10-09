@@ -192,7 +192,7 @@ def return_pdf(pdf_name):
         file_handle.save(return_filename)
         file_handle.close()
 
-        return send_file(return_filename,as_attachment=True)
+        return send_file(return_filename,secure_filename(pdf_name))
     except:
         print(traceback.format_exc())
         abort(404)
