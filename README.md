@@ -39,5 +39,6 @@ Docker is the best way to deploy the app.
 3. `DOCKER_HOST="ssh://remote.docker.host" docker-compose down`
 4. `DOCKER_HOST="ssh://remote.docker.host" docker-compose build`
 5. `DOCKER_HOST="ssh://remote.docker.host" docker-compose up -d`
+6. Get a shell: `DOCKER_HOST="ssh://peak-one.ics.uplb.edu.ph" docker-compose exec flask sh`
 
 
