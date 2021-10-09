@@ -183,7 +183,8 @@ def return_pdf(pdf_name):
         img=open(qrcode_filename, "rb").read()
 
         # define the position (upper-right corner)
-        image_rectangle = fitz.Rect(530,2,610,82)
+        #image_rectangle = fitz.Rect(530,2,610,82)
+        image_rectangle = fitz.Rect(500,2,560,62)
         # add the image
         first_page.insertImage(image_rectangle, stream=img)
         
