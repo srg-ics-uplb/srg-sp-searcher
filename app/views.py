@@ -194,7 +194,7 @@ def return_pdf(pdf_name):
 
         resp = send_file(return_filename,secure_filename(pdf_name))
     
-        #remove the temporary files
+        #remove the temporary files (works only in linux)
         os.remove(qrcode_filename)
         os.remove(return_filename)
         
