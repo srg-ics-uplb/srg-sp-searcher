@@ -158,11 +158,12 @@ def uploaded_page():
 @auth.login_required
 def return_pdf(pdf_name):
     try:
+        #get current date and time in PH
         datetime_ph = datetime.now(pytz.timezone('Asia/Manila'))
         download_date=datetime_ph.strftime("%Y-%m-%d %H:%M:%S %Z %z" )        
         input_data=request.base_url+" "+download_date
-        print(input_data)
 
+        #generate a qr code
         qr = qrcode.QRCode(
             version=1,
             box_size=2,
@@ -173,18 +174,16 @@ def return_pdf(pdf_name):
         qrcode_filename=make_temp_file("qrcode.png")
         img.save(qrcode_filename) 
 
+        #get the path to the target pdf
         input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
-        print(input_file)
-
-        # define the position (upper-right corner)
-        image_rectangle = fitz.Rect(530,2,610,82)
 
         # retrieve the first page of the PDF
         file_handle = fitz.open(input_file)
         first_page = file_handle[0]
-
         img=open(qrcode_filename, "rb").read()
 
+        # define the position (upper-right corner)
+        image_rectangle = fitz.Rect(530,2,610,82)
         # add the image
         first_page.insertImage(image_rectangle, stream=img)
         
@@ -192,14 +191,12 @@ def return_pdf(pdf_name):
         file_handle.save(return_filename)
         file_handle.close()
 
-
-#        return redirect(url_for('static', filename=app.config['PDF_DIR'] + secure_filename(pdf_name)))
-        #return send_file(temp.name,as_attachment=True)
         return send_file(return_filename,as_attachment=True)
     except:
         print(traceback.format_exc())
         abort(404)
 
+#Utility function to create a temporaty file with suffix
 def make_temp_file(suffix):
         temp = tempfile.NamedTemporaryFile()
         return temp.name+"_"+suffix
