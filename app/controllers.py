@@ -64,6 +64,25 @@ def insert_word_to_db(pdf_id, word, freq):
     conn.commit()
     conn.close()
 
+
+def delete_from_db(pdf_name):
+    conn = conn_to_db('pdf.db')
+    cursor = conn.execute("SELECT ID FROM PDF WHERE NAME='"+pdf_name+"'")
+
+    for row in cursor:
+        pdf_id = int(row[0])
+    
+    print("DELETE FROM PDF WHERE ID="+str(pdf_id))
+    print("DELETE FROM FREQ WHERE PDF_ID="+str(pdf_id))
+    #cursor = conn.execute("DELETE FROM PDF WHERE ID="+)
+    conn.execute("DELETE FROM PDF WHERE ID="+str(pdf_id))
+    conn.execute("DELETE FROM FREQ WHERE PDF_ID="+str(pdf_id))
+
+    conn.commit()
+    conn.close()
+    return 0
+
+
 def count_pdf():
     conn = conn_to_db('pdf.db')
     cursor = conn.execute("SELECT COUNT(*) FROM PDF")

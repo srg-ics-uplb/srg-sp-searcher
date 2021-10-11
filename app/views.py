@@ -83,6 +83,9 @@ def search_page():
     if next_button:
         next_button = page + 1
 
+    if app.config['ALLOW_DELETE']:
+        return render_template('results.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
+
     return render_template('results.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
 
 @app.route('/upload', methods=['GET'])
@@ -153,6 +156,16 @@ def uploaded_page():
     except:
         return "Fail to uploadi."
 
+
+@app.route('/delete/<pdf_name>')
+@auth.login_required
+def del_pdf(pdf_name):
+    pdf_id=delete_from_db(pdf_name)
+
+    #get the path to the target pdf
+    input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
+    os.remove(input_file)
+    return pdf_name+" has been deleted. Back to <a href='/search'>search</a>."
 
 @app.route('/pdf/<pdf_name>')
 @auth.login_required
