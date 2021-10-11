@@ -167,6 +167,13 @@ def del_pdf(pdf_name):
     os.remove(input_file)
     return pdf_name+" has been deleted. Back to <a href='/search'>search</a>."
 
+
+@app.route('/bibtex/<pdf_name>')
+@auth.login_required
+def bibtex(pdf_name):
+    return generate_bibtex(pdf_name)
+
+
 @app.route('/pdf/<pdf_name>')
 @auth.login_required
 def return_pdf(pdf_name):

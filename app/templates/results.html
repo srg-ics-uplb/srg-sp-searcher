@@ -32,11 +32,11 @@
   </div>
 
   <div class="result__description">
-    Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}
+    Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}">[BibTeX]</a>
   </div>
 
  {% if allow_delete %}
-  <div class="reult__url">
+  <div class="result__url">
    <strong><a href="/delete/{{ row['pdf_name'] }}">DELETE</a></strong>
   </div>
  {% endif %}
