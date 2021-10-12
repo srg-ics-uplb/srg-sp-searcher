@@ -77,7 +77,8 @@ def generate_bibtex(pdf_name):
         temp2=temp1[len(temp1)-1]
         temp3=row[0].split(" ")
         cite_key = temp2+row[2]+temp3[0]
-        retval = "@techreport{"+cite_key+", title={"+row[0]+"}, author={" +row[1].replace(","," and ")+" }, year={"+row[2]+"}, institution={Institute of Computer Science, University of the Philippines Los Baños}, type={Special Problems and Theses Technical Reports Series}}"
+        retval = "@techreport{"+cite_key+", title={"+row[0]+"}, author={" +row[1].replace(","," and ")+" }, year={"+row[2]+"}, institution={"+app.config['INSTITUTION']+"}, type={"+app.config['RESEARCH_GROUP']+" Technical Reports}}"
+
 
     conn.close()
     return retval

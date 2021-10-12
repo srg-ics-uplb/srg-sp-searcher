@@ -14,6 +14,10 @@ app.config['ALLOW_UPLOAD'] = False
 #app.config['ALLOW_DELETE'] = True
 app.config['ALLOW_DELETE'] = False
 
+#
+app.config['RESEARCH_GROUP'] = ""
+app.config['INSTITUTION'] = "Institute of Computer Science, University of the Philippines Los Baños"
+
 
 
 from app import views
