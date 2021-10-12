@@ -160,8 +160,10 @@ def uploaded_page():
 @app.route('/delete/<pdf_name>')
 @auth.login_required
 def del_pdf(pdf_name):
-    pdf_id=delete_from_db(pdf_name)
+    if not app.config['ALLOW_DELETE']:
+        return "Delete is disabled. Back to <a href='/search'>search</a>." 
 
+    pdf_id=delete_from_db(pdf_name)
     #get the path to the target pdf
     input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
     os.remove(input_file)
