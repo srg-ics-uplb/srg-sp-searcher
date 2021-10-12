@@ -10,7 +10,7 @@ UNIQUE_VISITORS=`cat $ACCESS_LOG | grep pdf | awk -F ' ' '{print $1}' | uniq | w
 echo "Number of unique visitors: $UNIQUE_VISITORS"
 
 echo "Number of Downloads Per Report:"
-cat $ACCESS_LOG | grep pdf | awk -F ' ' '{print $7}' | sort | uniq -c | sort -nr
+cat $ACCESS_LOG | grep pdf | awk -F ' ' '{print $7}' | grep ^\/pdf | sort | uniq -c | sort -nr
 
 echo "Number of Downloads per IP Address:"
 cat $ACCESS_LOG | grep pdf | awk -F ' ' '{print $1}' | sort | uniq -c | sort -nr

@@ -44,5 +44,5 @@ host is configured for passwordless access.
 ## Monitor
 1. Get a shell: `DOCKER_HOST="ssh://remote.docker.host" docker-compose exec flask bash`
 2. Download access log: `DOCKER_HOST="ssh://remote.docker.host" docker cp srg-tr-searcher:/usr/src/access.log access_for_stats.log`
-3. Get some stats: `./stat.sh`
+3. Get some stats: `./stats.sh`
 

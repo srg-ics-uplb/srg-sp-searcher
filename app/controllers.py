@@ -68,12 +68,16 @@ def generate_bibtex(pdf_name):
     conn = conn_to_db('pdf.db')
     cursor = conn.execute("SELECT TITLE, AUTHORS, YEAR FROM PDF WHERE NAME='"+pdf_name+"'")
     
-    fields = pdf_name.split("_")
-    cite_key=fields[len(fields)-1].split(".")[0]
+    #fields = pdf_name.split("_")
+    #cite_key=fields[len(fields)-1].split(".")[0]
 
     for row in cursor: 
-        cite_key = cite_key+row[2]
-        retval = "@techreport{"+cite_key+", title={"+row[0]+"}, author={" +row[1].replace(","," and ")+" }, year={"+row[2]+"}, institution={Institute of Computer Science, University of the Philippines Los Banos}, type={Undergraduate Special Problems and Theses}}"
+        fields = row[1].split(",")
+        temp1=fields[0].split(" ")
+        temp2=temp1[len(temp1)-1]
+        temp3=row[0].split(" ")
+        cite_key = temp2+row[2]+temp3[0]
+        retval = "@techreport{"+cite_key+", title={"+row[0]+"}, author={" +row[1].replace(","," and ")+" }, year={"+row[2]+"}, institution={Institute of Computer Science, University of the Philippines Los Baños}, type={Special Problems and Theses Technical Reports Series}}"
 
     conn.close()
     return retval
