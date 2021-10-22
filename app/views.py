@@ -49,7 +49,7 @@ def protected(filename):
 
 @app.route('/', methods=['GET'])
 @app.route('/search', methods=['GET'])
-@auth.login_required
+#@auth.login_required
 def search_page():
     query = request.args.get('s')
     page  = request.args.get('p')
@@ -171,7 +171,7 @@ def del_pdf(pdf_name):
 
 
 @app.route('/bibtex/<pdf_name>')
-@auth.login_required
+#@auth.login_required
 def bibtex(pdf_name):
     return generate_bibtex(pdf_name)
 
