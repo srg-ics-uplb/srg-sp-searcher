@@ -40,19 +40,21 @@ h1 {
   border-style: solid;
   border-width: 1px 0;
   overflow: hidden;
+  overflow-wrap: break-word;
 }
 
 .result__title {
   text-overflow: ellipsis;
   overflow: hidden;
-  white-space: nowrap;
+  #white-space: nowrap;
   color: #1a0dab;
   font-size: 18px;
   line-height: 1;
   font-weight: normal;
   text-decoration: none;
-  white-space: nowrap;
+  #white-space: nowrap;
   cursor: pointer;
+  overflow-wrap: break-word;
 }
 
 .result__title:visited {
