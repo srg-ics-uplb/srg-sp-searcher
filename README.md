@@ -16,7 +16,9 @@ In Ubuntu 20.04: `sudo apt install python3-pip sqlite3`
 
 ## Install
 
-1. `git clone https://github.com/srg-ics-uplb/srg-tr-searcher`
+(Download the release from the Releases section: https://github.com/srg-ics-uplb/srg-tr-searcher/releases)
+
+1. `tar xzvf srg-tr-searcher.tar.gz`
 2. `cd srg-tr-searcher`
 3. `pip install -r requirements.txt`
 4. `export PATH=$PATH:$HOME/.local/bin`
