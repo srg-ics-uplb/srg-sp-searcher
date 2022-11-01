@@ -208,7 +208,7 @@ def return_pdf(pdf_name):
         #image_rectangle = fitz.Rect(530,2,610,82)
         image_rectangle = fitz.Rect(500,2,560,62)
         # add the image
-        first_page.insertImage(image_rectangle, stream=img)
+        first_page.insert_image(image_rectangle, stream=img)
         
         return_filename = make_temp_file(secure_filename(pdf_name))
         file_handle.save(return_filename)
