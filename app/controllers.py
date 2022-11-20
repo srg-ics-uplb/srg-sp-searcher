@@ -222,3 +222,32 @@ def get_word_cout(txt):
     words = map(lemmatize, txt.lower().split())
     word_count = Counter(words)
     return word_count 
+
+def get_recents(limit=3, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
+    nb_pdf = count_pdf()
+
+    conn = conn_to_db('pdf.db')
+
+    start_time=time()
+    cursor = conn.execute("""
+        SELECT
+        NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
+        FROM PDF
+        ORDER BY ID DESC LIMIT {}
+    """.format(limit))
+    conn.commit()
+    end_time=time()
+
+    pdfs = []
+    for row in cursor:
+        pdfs.append({   "pdf_name"  : row[0], 
+                        "date"      : format(datetime.fromtimestamp(row[1]), '%d/%m/%Y'),
+                        "title"     : row[2],
+                        "authors"   : row[3],
+                        "year"      : row[4],
+                        "month"     : row[5],  
+                        "abstract"  : row[6],
+                        "score" : 0})
+
+    conn.close()
+    return pdfs, end_time - start_time, False #pdfs list, time took to process and False for telling to not display a "next button"

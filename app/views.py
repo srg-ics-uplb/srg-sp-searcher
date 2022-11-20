@@ -48,6 +48,15 @@ def protected(filename):
 
 
 @app.route('/', methods=['GET'])
+def home_page():
+
+    rows, speed, next_button = get_recents()
+
+    if app.config['ALLOW_DELETE']:
+        return render_template('home.html', rows=rows, speed=speed, next_button=next_button, allow_delete=True)
+
+    return render_template('home.html', rows=rows, speed=speed, next_button=next_button)
+
 @app.route('/search', methods=['GET'])
 #@auth.login_required
 def search_page():
