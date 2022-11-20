@@ -123,7 +123,7 @@ def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
     start_time = time()
     # a pdf_score is calculated  with sum(tf-idf) of words matched time the number of different words matched on the pdf
     cursor = conn.execute("""
-        SELECT PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH
+        SELECT PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
         FROM (SELECT PDF_ID, WORD, W_FREQ
               FROM FREQ
               WHERE WORD IN ({}))
@@ -132,7 +132,7 @@ def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
               FROM FREQ WHERE W2 IN ({})
               GROUP BY W2) ON WORD = W2
           INNER JOIN
-             (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH
+             (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
               FROM PDF) ON ID = PDF_ID
         GROUP BY PDF_ID
         ORDER BY SCORE DESC
@@ -149,14 +149,15 @@ def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
                      "title"     : row[5],
                      "authors"  : row[6],
                      "year"     : row[7],
-                     "month"    : row[8]})
+                     "month"    : row[8],
+                     "abstract" : row[9]})
     conn.close()
 
     if len(pdfs) == nb_max_by_pages:
         return pdfs, end_time - start_time, True #pdfs list, time took to process and True for telling to display a "next button"
 
     conn = conn_to_db('pdf.db')
-    cursor = conn.execute("SELECT NAME, DATE, TITLE, AUTHORS, YEAR, MONTH FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
+    cursor = conn.execute("SELECT NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
     conn.commit()
 
     for row in cursor:
@@ -166,6 +167,7 @@ def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
                         "authors"   : row[3],
                         "year"      : row[4],
                         "month"     : row[5],  
+                        "abstract"  : row[6],
                         "score" : 0})
 
     conn.close()
@@ -220,4 +222,3 @@ def get_word_cout(txt):
     words = map(lemmatize, txt.lower().split())
     word_count = Counter(words)
     return word_count 
-

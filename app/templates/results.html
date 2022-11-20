@@ -31,6 +31,10 @@
     <strong>{{ row["authors"] }}</strong>
   </div>
 
+  <div>
+    <p style="font-size: 1.2em">{{ row["abstract"] }}</p>
+  </div>
+
   <div class="result__description">
     Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
   </div>

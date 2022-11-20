@@ -17,10 +17,12 @@
   <table>
   <tr><td><input type="text" id="title" name="title" required minlength="4" maxlength="200" size="55" placeholder="Title"></td></tr>
   <tr><td><input type="text" id="authors" name="authors" required minlength="4" maxlength="200" size="55" placeholder="Authors (comma seperated)"></td></tr>
+  <tr><td><textarea type="text" id="abstract" name="title" required minlength="4" size="55" placeholder="Abstract"></textarea></td></tr>
+  <tr><td><input type="text" id="index_terms" name="authors" required minlength="4" maxlength="200" size="55" placeholder="Index Terms (comma seperated)"></td></tr>
   <tr><td><input type="number" id="year" name="year" required minlength="4" maxlength="200" size="55" placeholder="Publication Year"></td></tr>
   <tr><td>
      <select id="month" name="month" required >
-     <option value="None">Select Publication Month</option>
+     <option value="" selected hidden>Select Publication Month</option>
      <option value="January">January</option>
      <option value="February">February</option>
      <option value="March">March</option>

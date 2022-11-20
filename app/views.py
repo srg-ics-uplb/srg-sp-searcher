@@ -110,6 +110,8 @@ def uploaded_page():
         authors = request.form['authors']
         year = request.form['year']
         month = request.form['month']
+        abstract = request.form['abstract']
+        index_terms = request.form['index_terms']
 
         uploaded_file = request.files['file']
         file_name = uploaded_file.filename
@@ -135,7 +137,12 @@ def uploaded_page():
             #adding the file name to the text for searching by file name...
             #norm_filnam = normalize_txt(file_name.replace('_', ' ').replace('.', ' ').replace('-', ' '))
             #txt = read_as_txt(pdf_path) + " " + norm_filnam
-            txt = read_as_txt(pdf_path) + " " + title + " " + authors + " " + year + " " + month
+            # txt = read_as_txt(pdf_path) + " " + title + " " + authors + " " + year + " " + month
+            txt = abstract + " " + index_terms + " " + title + " " + authors + " " + year + " " + month
+            txt_arr = txt.split(' ')
+            txt = ""
+            for word in txt_arr:
+                txt = txt + " " + word.strip(',.')
 
             if not txt:
                 remove(pdf_path)
