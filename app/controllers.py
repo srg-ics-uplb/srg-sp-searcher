@@ -46,12 +46,12 @@ def pdf_allready_exists(pdf_name):
     conn.close()
     return False
 
-def insert_pdf_to_db(pdf_name,title,authors,year,month):
+def insert_pdf_to_db(pdf_name,title,authors,year,month,abstract,index_terms):
     # insert a pdf into the database and return his id
     path = app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'] + pdf_name
     conn = conn_to_db('pdf.db')
-    cursor = conn.execute("INSERT INTO PDF (NAME, HASH, DATE, TITLE, AUTHORS, YEAR, MONTH ) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
-                                            pdf_name, hash_file(path), int(time()), title, authors, year, month))
+    cursor = conn.execute("INSERT INTO PDF (NAME, HASH, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT, INDEX_TERMS ) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+                                            pdf_name, hash_file(path), int(time()), title, authors, year, month, abstract, index_terms))
     conn.commit()
     pdf_id = cursor.lastrowid
     conn.close()
@@ -151,24 +151,24 @@ def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
                      "year"     : row[7],
                      "month"    : row[8],
                      "abstract" : row[9]})
-    conn.close()
+    # conn.close()
 
-    if len(pdfs) == nb_max_by_pages:
-        return pdfs, end_time - start_time, True #pdfs list, time took to process and True for telling to display a "next button"
+    # if len(pdfs) == nb_max_by_pages:
+    #     return pdfs, end_time - start_time, True #pdfs list, time took to process and True for telling to display a "next button"
 
-    conn = conn_to_db('pdf.db')
-    cursor = conn.execute("SELECT NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
-    conn.commit()
+    # conn = conn_to_db('pdf.db')
+    # cursor = conn.execute("SELECT NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
+    # conn.commit()
 
-    for row in cursor:
-        pdfs.append({   "pdf_name"  : row[0], 
-                        "date"      : format(datetime.fromtimestamp(row[1]), '%d/%m/%Y'),
-                        "title"     : row[2],
-                        "authors"   : row[3],
-                        "year"      : row[4],
-                        "month"     : row[5],  
-                        "abstract"  : row[6],
-                        "score" : 0})
+    # for row in cursor:
+    #     pdfs.append({   "pdf_name"  : row[0], 
+    #                     "date"      : format(datetime.fromtimestamp(row[1]), '%d/%m/%Y'),
+    #                     "title"     : row[2],
+    #                     "authors"   : row[3],
+    #                     "year"      : row[4],
+    #                     "month"     : row[5],  
+    #                     "abstract"  : row[6],
+    #                     "score" : 0})
 
     conn.close()
     return pdfs, end_time - start_time, False #pdfs list, time took to process and False for telling to not display a "next button"
