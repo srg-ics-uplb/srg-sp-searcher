@@ -1,0 +1,101 @@
+
+    /* * { outline: 1px solid red; } */
+    body {
+      min-height: 100vh;
+      max-width: 100vw;
+      margin: 0;
+      box-sizing: border-box;
+      font-family: sans-serif;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    header {
+      width: 100vw;
+      background-color: #cdcdcd;
+    }
+
+    header > div {
+      width: min(90vw, 1600px);
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 2em;
+    }
+
+    header form {
+      width: min(600px, 50%);
+      display: flex;
+    }
+
+    header form * {
+      margin: 0 auto;
+      padding: .5em 1em;
+    }
+    
+    header form input {
+      flex-grow: 1;
+    }
+
+    header button,
+    header a {
+      font-weight: bold;
+    }
+
+    header nav {
+      display: flex;
+      gap: 2em;
+    }
+
+    header a {
+      text-decoration: none;
+      color: black;
+    }
+    
+    main {
+      width: min(90vw, 1600px);
+      margin: 3em auto;
+    }
+
+    footer {
+      width: 100vw;
+      padding-top: 2em;
+      background-color: #cdcdcd;
+    }
+
+    footer > div {
+      width: min(90vw, 1600px);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    footer div > div {
+      padding: .5em 1em;
+    }
+    
+    footer h3 {
+      margin: 0;
+    }
+
+    footer form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: .5em;
+    }
+
+    footer form h3 {
+      margin-top: 0;
+    }
+
+    footer form input,
+    footer form textarea,
+    footer form button {
+      padding: .5em 1em;
+      font-family: sans-serif;
+    }
+
+    footer form textarea {
+      height: 5em;
+    }

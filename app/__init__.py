@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, abort, session
 from flask_session import Session
+import json
 
 app = Flask(__name__)
 
@@ -21,6 +22,15 @@ app.config['INSTITUTION'] = "Institute of Computer Science, University of the Ph
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
+
+
+
+CLIENT_SECRETS_FILE = open('client_secret.json')
+CLIENT_SECRETS = json.load(CLIENT_SECRETS_FILE)
+CLIENT_SECRETS_FILE.close()
+
+app.config['GOOGLE_API_CLIENT_SECRETS'] = CLIENT_SECRETS['web']
+app.config['GOOGLE_CLIENT_ID'] = CLIENT_SECRETS['web'].get('client_id')
 
 print("Server listening on http://localhost:5000")
 

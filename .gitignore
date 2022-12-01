@@ -6,3 +6,5 @@ app/sql/users.db
 .keep
 access.log
 error.log
+client_secret.json
+flask_session/

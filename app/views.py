@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, abort, session, send_from_directory, send_file
+from flask import Flask, render_template, request, redirect, url_for, abort, session, send_from_directory, send_file, make_response
 from werkzeug.utils import secure_filename
 from app import app
 from time import time
@@ -10,8 +10,11 @@ import qrcode
 import fitz
 import tempfile
 import pytz
+# import requests
 
 from . controllers import *
+from . oauth import *
+import json
 
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -36,7 +39,6 @@ users = {
     user: generate_password_hash(pw)
 }
 
-
 @app.route('/static/pdf/<path:filename>')
 @auth.login_required
 def protected(filename):
@@ -47,15 +49,15 @@ def protected(filename):
     return send_from_directory(pdf_file,filename)
 
 
-@app.route('/', methods=['GET'])
-def home_page():
+# @app.route('/', methods=['GET'])
+# def index_page():
 
-    rows, speed, next_button = get_recents()
+#     rows, speed, next_button = get_recents()
 
-    if app.config['ALLOW_DELETE']:
-        return render_template('home.html', rows=rows, speed=speed, next_button=next_button, allow_delete=True)
+#     if app.config['ALLOW_DELETE']:
+#         return render_template('index.html', rows=rows, speed=speed, next_button=next_button, allow_delete=True)
 
-    return render_template('home.html', rows=rows, speed=speed, next_button=next_button)
+#     return render_template('index.html', rows=rows, speed=speed, next_button=next_button)
 
 @app.route('/search', methods=['GET'])
 #@auth.login_required
@@ -64,7 +66,8 @@ def search_page():
     page  = request.args.get('p')
 
     if not query:
-        return render_template('search.html', allow_upload=app.config['ALLOW_UPLOAD'], count_pdf=count_pdf())
+        # return render_template('search.html', allow_upload=app.config['ALLOW_UPLOAD'], count_pdf=count_pdf())
+        return redirect('/')
 
     try:
         page = abs(int(page))
@@ -85,7 +88,8 @@ def search_page():
     print(words)
 
     if not words:
-        return render_template('search.html')
+        # return render_template('index.html')
+        return redirect('/')
 
     rows, speed, next_button = get_results(words, page)
 
@@ -93,15 +97,17 @@ def search_page():
         next_button = page + 1
 
     if app.config['ALLOW_DELETE']:
-        return render_template('results.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
+        return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
 
-    return render_template('results.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
+    if session['user']:
+        return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, user=session['user'])
+    return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
 
 @app.route('/upload', methods=['GET'])
 @auth.login_required
 def upload_page():
     if not app.config['ALLOW_UPLOAD']:
-        return render_template('search.html')
+        return render_template('index.html')
     return render_template('upload.html')
 
 @app.route('/upload', methods=['POST'])
@@ -164,7 +170,7 @@ def uploaded_page():
             print(traceback.format_exc())
             return "This is not a pdf... <a href='/search'>search</a>." 
 
-        pdf_id = insert_pdf_to_db(file_name,title,authors,year,month) #add the pdf to the database 
+        pdf_id = insert_pdf_to_db(file_name,title,authors,year,month,abstract,index_terms) #add the pdf to the database 
         total_words = sum(counter.values())
         for word in counter: #update the words in database
             insert_word_to_db(pdf_id, word, counter[word] / float(total_words))
@@ -246,3 +252,36 @@ def make_temp_file(suffix):
         temp = tempfile.NamedTemporaryFile()
         return temp.name+"_"+suffix
 
+
+
+
+
+
+@app.route('/', methods=['GET'])
+def index():
+    print('GET /')
+    rows, speed, next_button = get_recents(limit=8)
+    if not session['user']:
+        res = make_response(render_template('index.html', rows=rows, speed=speed, next_button=next_button, client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
+        res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
+        res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
+        return res
+
+    return render_template('index.html', rows=rows, speed=speed, next_button=next_button, user = session['user'])
+
+
+@app.route('/callback', methods=['POST', 'GET'])
+def callback():
+    credential = request.form.get('credential')
+    user = verify_token(credential)
+    if user:
+        session['user'] = json.dumps(user)
+
+        # get view history and saved pdfs
+    
+    return redirect('/')
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session['user'] = None
+    return redirect('/')
