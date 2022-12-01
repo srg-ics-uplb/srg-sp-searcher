@@ -3,7 +3,6 @@ timeout = 30
 workers = 3
 threads = 2
 keepalive = 2
-reload = True
 
 pidfile = None
 umask = 0
