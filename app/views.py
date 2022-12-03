@@ -282,7 +282,7 @@ def make_temp_file(suffix):
 def index():
     print('GET /')
     rows, speed, next_button = get_recents(limit=8)
-    if not session['user']:
+    if not session or not session['user']:
         res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
         res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
         res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
@@ -311,6 +311,8 @@ def logout():
 @app.route('/history', methods=['GET'])
 def history():
     print('GET /history')
+    if not session or not session['user']:
+        return redirect('/')
     user = json.loads(session['user'])
     rows, speed, next_button = get_history(user.get('userid'))
     return render_template('index.html', rows=rows, speed=speed, next_button=next_button, name=" ".join([user['given_name'], user['family_name']]), picture=user['picture'])
