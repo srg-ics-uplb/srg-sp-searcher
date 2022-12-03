@@ -13,34 +13,52 @@ import pytz
 # import requests
 
 from . controllers import *
+from . user_controllers import *
 from . oauth import *
 import json
 
-from flask_httpauth import HTTPBasicAuth
-from werkzeug.security import generate_password_hash, check_password_hash
+# from flask_httpauth import HTTPBasicAuth
+# from werkzeug.security import generate_password_hash, check_password_hash
 
 import io
 import random
 import unicodedata
 
+# def login_is_required(function):
 
-auth = HTTPBasicAuth()
+#     def wrapper(*args, **kwargs):
+#         if "user" not in session:
+#             return render_template('login.html', client_id=app.config['GOOGLE_CLIENT_ID'], oauth_callback_url='http://localhost:5000/callback')
 
-@auth.verify_password
-def verify_password(username, password):
-    if username in users:
-        return check_password_hash(users.get(username), password)
-    return False
+#         return function()
+        
+#     return wrapper
 
-user = app.config["USERNAME"]
-pw = app.config["PASSWORD"]
+# @app.before_request
+# def hook():
+#     if request.path('/callback'):
+#         return
+#     if not session['user']:
+#         return render_template('login.html', client_id=app.config['GOOGLE_CLIENT_ID'], oauth_callback_url='http://localhost:5000/callback')
+#     return
+    
+# auth = HTTPBasicAuth()
 
-users = {
-    user: generate_password_hash(pw)
-}
+# @auth.verify_password
+# def verify_password(username, password):
+#     if username in users:
+#         return check_password_hash(users.get(username), password)
+#     return False
+
+# user = app.config["USERNAME"]
+# pw = app.config["PASSWORD"]
+
+# users = {
+#     user: generate_password_hash(pw)
+# }
 
 @app.route('/static/pdf/<path:filename>')
-@auth.login_required
+# @auth.login_required
 def protected(filename):
     pdf_file=os.path.join(app.root_path,'static',app.config['PDF_DIR'])
     #pdf_file=os.path.join(app.instance_path,'static',app.config['PDF_DIR'])
@@ -60,7 +78,7 @@ def protected(filename):
 #     return render_template('index.html', rows=rows, speed=speed, next_button=next_button)
 
 @app.route('/search', methods=['GET'])
-#@auth.login_required
+# @auth.login_required
 def search_page():
     query = request.args.get('s')
     page  = request.args.get('p')
@@ -100,18 +118,18 @@ def search_page():
         return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
 
     if session['user']:
-        return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, user=session['user'])
+        return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
     return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
 
 @app.route('/upload', methods=['GET'])
-@auth.login_required
+# @auth.login_required
 def upload_page():
     if not app.config['ALLOW_UPLOAD']:
         return render_template('index.html')
     return render_template('upload.html')
 
 @app.route('/upload', methods=['POST'])
-@auth.login_required
+# @auth.login_required
 def uploaded_page():
     if not app.config['ALLOW_UPLOAD']:
         return render_template('search.html')
@@ -180,7 +198,7 @@ def uploaded_page():
 
 
 @app.route('/delete/<pdf_name>')
-@auth.login_required
+# @auth.login_required
 def del_pdf(pdf_name):
     if not app.config['ALLOW_DELETE']:
         return "Delete is disabled. Back to <a href='/search'>search</a>." 
@@ -193,15 +211,18 @@ def del_pdf(pdf_name):
 
 
 @app.route('/bibtex/<pdf_name>')
-#@auth.login_required
+# @auth.login_required
 def bibtex(pdf_name):
     return generate_bibtex(pdf_name)
 
 
 @app.route('/pdf/<pdf_name>')
-@auth.login_required
+# @auth.login_required
 def return_pdf(pdf_name):
     try:
+        # print(session['user'])
+        user = json.loads(session['user'])
+        add_pdf_to_view_history(pdf_name, user.get('userid'))
         #get current date and time in PH
         datetime_ph = datetime.now(pytz.timezone('Asia/Manila'))
         download_date=datetime_ph.strftime("%Y-%m-%d %H:%M:%S %Z %z" )        
@@ -212,7 +233,7 @@ def return_pdf(pdf_name):
             version=1,
             box_size=2,
             border=5)
-        qr.add_data(input_data)
+        qr.add_data(input_data) 
         qr.make(fit=True)
         img = qr.make_image(fill='black', back_color='white')
         qrcode_filename=make_temp_file("qrcode.png")
@@ -262,22 +283,23 @@ def index():
     print('GET /')
     rows, speed, next_button = get_recents(limit=8)
     if not session['user']:
-        res = make_response(render_template('index.html', rows=rows, speed=speed, next_button=next_button, client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
+        res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
         res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
         res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
         return res
 
-    return render_template('index.html', rows=rows, speed=speed, next_button=next_button, user = session['user'])
+    user = json.loads(session['user'])
+    return render_template('index.html', rows=rows, speed=speed, next_button=next_button, name=" ".join([user['given_name'], user['family_name']]), picture=user['picture'])
 
 
 @app.route('/callback', methods=['POST', 'GET'])
 def callback():
     credential = request.form.get('credential')
-    user = verify_token(credential)
-    if user:
-        session['user'] = json.dumps(user)
-
+    user_google_data = verify_token(credential)
+    if user_google_data:
         # get view history and saved pdfs
+        user = upsert_user(user_google_data)
+        session['user'] = json.dumps(user)
     
     return redirect('/')
 
@@ -285,3 +307,10 @@ def callback():
 def logout():
     session['user'] = None
     return redirect('/')
+
+@app.route('/history', methods=['GET'])
+def history():
+    print('GET /history')
+    user = json.loads(session['user'])
+    rows, speed, next_button = get_history(user.get('userid'))
+    return render_template('index.html', rows=rows, speed=speed, next_button=next_button, name=" ".join([user['given_name'], user['family_name']]), picture=user['picture'])

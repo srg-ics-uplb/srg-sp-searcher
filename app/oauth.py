@@ -53,7 +53,7 @@ def verify_token(token):
   try:
 
     # Specify the CLIENT_ID of the app that accesses the backend:
-    idinfo = id_token.verify_oauth2_token(token, Request(), app.config['GOOGLE_CLIENT_ID'], clock_skew_in_seconds=10000)
+    idinfo = id_token.verify_oauth2_token(token, Request(), app.config['GOOGLE_CLIENT_ID'], clock_skew_in_seconds=100000) # EXPERIMENTAL: clock_skew_in_seconds; for 'Token used too early' error
 
     # Or, if multiple clients access the backend server:
     # idinfo = id_token.verify_oauth2_token(token, requests.Request())

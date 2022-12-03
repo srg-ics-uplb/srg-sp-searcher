@@ -21,6 +21,8 @@ from email.generator import Generator
 import traceback
 import sys
 
+from . user_controllers import *
+
 
 from nltk import PorterStemmer
 
@@ -223,6 +225,10 @@ def get_word_cout(txt):
     word_count = Counter(words)
     return word_count 
 
+
+
+
+
 def get_recents(limit=3, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
     nb_pdf = count_pdf()
 
@@ -251,3 +257,61 @@ def get_recents(limit=3, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
 
     conn.close()
     return pdfs, end_time - start_time, False #pdfs list, time took to process and False for telling to not display a "next button"
+
+def get_history(userid):
+    view_history = get_view_history(userid)
+
+    conn = conn_to_db('pdf.db')
+
+    start_time = time()
+    cursor = conn.execute("""
+        SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
+        FROM PDF
+        WHERE ID IN ({})
+    """.format(
+        ', '.join(str(x) for x in view_history)
+    ))
+    end_time = time()
+
+    pdfs = []
+    for row in cursor:
+        pdfs.append({
+            "id"    : row[0],
+            "pdf_name"  : row[1],
+            "date"      : row[2],
+            "title"     : row[3],
+            "authors"   : row[4],
+            "year"      : row[5],
+            "month"     : row[6],
+            "abstract"  : row[7]
+        })
+    conn.close()
+    return pdfs, end_time - start_time, False
+
+
+def get_pdfid_by_name(name):
+  try:
+    conn = conn_to_db('pdf.db')
+    cursor = conn.execute("""
+      SELECT ID FROM PDF WHERE NAME = '{}'
+    """.format(
+      name
+    ))
+    pdfid = None
+    for row in cursor:
+      pdfid = row[0]
+
+    conn.close()
+    return pdfid
+  except sqlite3.Error as e:
+    print(e)
+    pass
+
+def add_pdf_to_view_history(pdf_name, userid):
+    pdfid = get_pdfid_by_name(name=pdf_name)
+    view_history = get_view_history(userid)
+    if pdfid in view_history:
+        view_history.remove(pdfid)
+    view_history.append(pdfid)
+    update_view_history(userid=userid, view_history=view_history)
+    return
