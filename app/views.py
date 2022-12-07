@@ -17,48 +17,11 @@ from . user_controllers import *
 from . oauth import *
 import json
 
-# from flask_httpauth import HTTPBasicAuth
-# from werkzeug.security import generate_password_hash, check_password_hash
-
 import io
 import random
 import unicodedata
 
-# def login_is_required(function):
-
-#     def wrapper(*args, **kwargs):
-#         if "user" not in session:
-#             return render_template('login.html', client_id=app.config['GOOGLE_CLIENT_ID'], oauth_callback_url='http://localhost:5000/callback')
-
-#         return function()
-        
-#     return wrapper
-
-# @app.before_request
-# def hook():
-#     if request.path('/callback'):
-#         return
-#     if not session['user']:
-#         return render_template('login.html', client_id=app.config['GOOGLE_CLIENT_ID'], oauth_callback_url='http://localhost:5000/callback')
-#     return
-    
-# auth = HTTPBasicAuth()
-
-# @auth.verify_password
-# def verify_password(username, password):
-#     if username in users:
-#         return check_password_hash(users.get(username), password)
-#     return False
-
-# user = app.config["USERNAME"]
-# pw = app.config["PASSWORD"]
-
-# users = {
-#     user: generate_password_hash(pw)
-# }
-
 @app.route('/static/pdf/<path:filename>')
-# @auth.login_required
 def protected(filename):
     pdf_file=os.path.join(app.root_path,'static',app.config['PDF_DIR'])
     #pdf_file=os.path.join(app.instance_path,'static',app.config['PDF_DIR'])
@@ -66,19 +29,7 @@ def protected(filename):
     print(pdf_file,filename)
     return send_from_directory(pdf_file,filename)
 
-
-# @app.route('/', methods=['GET'])
-# def index_page():
-
-#     rows, speed, next_button = get_recents()
-
-#     if app.config['ALLOW_DELETE']:
-#         return render_template('index.html', rows=rows, speed=speed, next_button=next_button, allow_delete=True)
-
-#     return render_template('index.html', rows=rows, speed=speed, next_button=next_button)
-
 @app.route('/search', methods=['GET'])
-# @auth.login_required
 def search_page():
     query = request.args.get('s')
     page  = request.args.get('p')
@@ -122,14 +73,12 @@ def search_page():
     return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
 
 @app.route('/upload', methods=['GET'])
-# @auth.login_required
 def upload_page():
     if not app.config['ALLOW_UPLOAD']:
         return render_template('index.html')
     return render_template('upload.html')
 
 @app.route('/upload', methods=['POST'])
-# @auth.login_required
 def uploaded_page():
     if not app.config['ALLOW_UPLOAD']:
         return render_template('search.html')
@@ -198,7 +147,6 @@ def uploaded_page():
 
 
 @app.route('/delete/<pdf_name>')
-# @auth.login_required
 def del_pdf(pdf_name):
     if not app.config['ALLOW_DELETE']:
         return "Delete is disabled. Back to <a href='/search'>search</a>." 
@@ -211,13 +159,11 @@ def del_pdf(pdf_name):
 
 
 @app.route('/bibtex/<pdf_name>')
-# @auth.login_required
 def bibtex(pdf_name):
     return generate_bibtex(pdf_name)
 
 
 @app.route('/pdf/<pdf_name>')
-# @auth.login_required
 def return_pdf(pdf_name):
     try:
         # print(session['user'])
@@ -278,18 +224,22 @@ def make_temp_file(suffix):
 
 
 
+@app.before_request
+def check_auth():
+    if request.path.startswith('/static/styles'):
+        return
+    print("{} {}".format(request.method, request.path))
+    if request.path in ['/login', '/callback']:
+        return
+    if not session or not session['user']:
+        return redirect('/login')
+    return
+
 @app.route('/', methods=['GET'])
 def index():
-    print('GET /')
     rows, speed, next_button = get_recents(limit=8)
-    if not session or not session['user']:
-        res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
-        res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
-        res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
-        return res
-
     user = json.loads(session['user'])
-    return render_template('index.html', rows=rows, speed=speed, next_button=next_button, name=" ".join([user['given_name'], user['family_name']]), picture=user['picture'])
+    return render_template('index.html', rows=rows, speed=speed, next_button=next_button, name=" ".join([user['given_name'], user['family_name']]), picture=user.get('picture'))
 
 
 @app.route('/callback', methods=['POST', 'GET'])
@@ -303,16 +253,21 @@ def callback():
     
     return redirect('/')
 
+@app.route('/login', methods=['GET'])
+def login():
+    res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
+    res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
+    res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
+    return res
+
+
 @app.route('/logout', methods=['GET'])
 def logout():
     session['user'] = None
-    return redirect('/')
+    return redirect('/login')
 
 @app.route('/history', methods=['GET'])
 def history():
-    print('GET /history')
-    if not session or not session['user']:
-        return redirect('/')
     user = json.loads(session['user'])
     rows, speed, next_button = get_history(user.get('userid'))
     return render_template('index.html', rows=rows, speed=speed, next_button=next_button, name=" ".join([user['given_name'], user['family_name']]), picture=user['picture'])

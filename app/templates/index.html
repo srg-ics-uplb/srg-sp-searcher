@@ -8,7 +8,6 @@
 
   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/results.css') }}">
   <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/template.css') }}">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -20,7 +19,7 @@
         <button type="submit" >Search</button>
       </form>
       <div id="profile">
-        <img src="{{ picture }}" alt="User Profile" />
+        <img src=" {{ picture }} " alt="User Profile" />
         {{ name }}
         <nav id="nav" class="hidden">
           <a href="/history">History</a>
