@@ -1,2 +1,2 @@
 clear
-gunicorn -c gunicorn_dev_config.py app:app --preload
+gunicorn -c gunicorn_dev_config.py app:app
