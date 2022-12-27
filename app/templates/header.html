@@ -1,0 +1,36 @@
+<header>
+  <div>
+    <a href="/"><h1>UPLB ICS Peak One</h1></a>
+    <form action="/search" method="GET" >
+      <input type="text" id="s" name="s" placeholder="Maximum of 5 words" {% if not user %} disabled {% endif %} required>
+      <button type="submit" {% if not user %} disabled {% endif %} >Search</button>
+    </form>
+    {% if user %}
+      <div id="profile">
+        <img src={{ user['picture'] }} alt="User Profile" />
+        {{ user['name'] }}
+        <nav id="nav" class="hidden">
+          <a href="/history">History</a>
+          <a >Saved</a>
+          <a href="/logout">Logout</a>
+        </nav>
+      </div>
+    {% else %}
+      <!-- 'Sign in with Google' button -->
+      <script src="https://accounts.google.com/gsi/client" async defer></script>
+      <div id="g_id_onload"
+        data-client_id="{{ client_id }}"
+        data-login_uri="{{ oauth_callback_url }}"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="outline"
+        data-text="sign_in_with"
+        data-shape="rectangular"
+        data-logo_alignment="left">
+      </div>
+    {% endif %}
+  </div>
+</header>

@@ -149,6 +149,7 @@ footer form textarea,
 footer form button {
   padding: .5em 1em;
   font-family: sans-serif;
+  resize: none;
 }
 
 footer form textarea {

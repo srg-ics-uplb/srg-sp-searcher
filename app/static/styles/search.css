@@ -2,16 +2,6 @@
   box-sizing: border-box;
 }
 
-footer.footer-info {
-  text-align: center;
-  bottom: 5px;
-  position: absolute;
-  width: 100%;
-  text-transform: uppercase;
-  font-size: 13px;
-  color: black;
-}
-
 html {
   -webkit-transition: opacity .5s;
   transition: opacity .5s;
@@ -32,30 +22,30 @@ body {
   font-family: 'Helvetica', Arial, sans-serif;
 }
 
-a, .a {
+main a, main .a {
   color: #168dff;
   text-decoration: none;
 }
 
-a:hover, .a:hover {
+main a:hover, main .a:hover {
   text-decoration: underline;
 }
 
-a:visited, .a:visited {
+main a:visited, main .a:visited {
   color: #706778;
 }
 
-.upload-link {
+main .upload-link {
   padding: 5px;
   float:right;
 }
 
-form {
-  position: absolute;
+main form {
+  /* position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  left: 0;
+  left: 0; */
   margin: auto;
   display: -webkit-box;
   display: -webkit-flex;
@@ -72,8 +62,11 @@ form {
           transform: translateZ(0);
 }
 
-form textarea,
-form input[type="text"], form input[type="file"], input[type="number"], select {
+main form textarea,
+main form input[type="text"], 
+main form input[type="file"], 
+main input[type="number"], 
+main select {
   -webkit-box-flex: 1;
   -webkit-flex: 1;
       -ms-flex: 1;
@@ -88,15 +81,16 @@ form input[type="text"], form input[type="file"], input[type="number"], select {
   transition: background-color .2s ease-out;
 }
 
-form input[type="file"] {
+main form input[type="file"] {
   padding: 10.5px;
 }
 
-form input[type="text"]:focus, form input[type="file"] {
+main form input[type="text"]:focus, 
+main form input[type="file"] {
   background-color: #fefbf3;
 }
 
-form .search {
+main form .search {
   padding: 12px 24px;
   font-size: 16px;
   text-align: center;
@@ -110,7 +104,7 @@ form .search {
   transition: background-color .2s;
 }
 
-form .search:hover {
+main form .search:hover {
   background-color: #564f5d;
 }
 
