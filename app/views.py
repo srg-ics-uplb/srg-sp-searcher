@@ -69,14 +69,19 @@ def search_page():
         return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
 
     if session['user']:
-        return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
+        userData = json.loads(session['user'])
+        user = {
+            "name": userData['given_name'] + " " + userData['family_name'],
+            "picture": userData['picture']
+        }
+        return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, user=user)
     return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
 
-@app.route('/upload', methods=['GET'])
-def upload_page():
-    if not app.config['ALLOW_UPLOAD']:
-        return render_template('index.html')
-    return render_template('upload.html')
+# @app.route('/upload', methods=['GET'])
+# def upload_page():
+#     if not app.config['ALLOW_UPLOAD']:
+#         return render_template('index.html')
+#     return render_template('upload.html')
 
 @app.route('/upload', methods=['POST'])
 def uploaded_page():
@@ -235,24 +240,29 @@ def check_auth():
         return redirect('/login')
     return
 
+
 @app.route('/', methods=['GET'])
 def index():
-    rows, speed, next_button = get_recents(limit=8)
+    rows, speed, next_button = get_recents()
     user = json.loads(session['user'])
-    return render_template('index.html', rows=rows, speed=speed, next_button=next_button, name=" ".join([user['given_name'], user['family_name']]), picture=user.get('picture'))
+    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, user=user)
 
-
-@app.route('/callback', methods=['POST', 'GET'])
-def callback():
-    credential = request.form.get('credential')
-    user_google_data = verify_token(credential)
-    if user_google_data:
-        # get view history and saved pdfs
-        user = upsert_user(user_google_data)
-        session['user'] = json.dumps(user)
+@app.route('/history', methods=['GET'])
+def history():
+    user = json.loads(session['user'])
+    userid = session['token']
+    rows, speed, next_button = get_history(userid)
+    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, user=user)
     
-    return redirect('/')
+@app.route('/upload', methods=['GET'])
+def upload_page():
+    user = json.loads(session['user'])
+    if not app.config['ALLOW_UPLOAD']:
+        return render_template('index.html')
+    return render_template('upload.html', user=user)
 
+
+# auth routes
 @app.route('/login', methods=['GET'])
 def login():
     res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
@@ -260,14 +270,22 @@ def login():
     res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
     return res
 
+@app.route('/callback', methods=['POST', 'GET'])
+def callback():
+    credential = request.form.get('credential')
+    user_google_data = verify_token(credential)
+    if user_google_data:
+        upsert_user(user_google_data)
+        user = {
+            "name": user_google_data['given_name'] + " " + user_google_data['family_name'],
+            "picture": user_google_data['picture']
+        }
+        session['user'] = json.dumps(user)
+        session['token'] = user_google_data['userid']
+    
+    return redirect('/')
 
 @app.route('/logout', methods=['GET'])
 def logout():
     session['user'] = None
     return redirect('/login')
-
-@app.route('/history', methods=['GET'])
-def history():
-    user = json.loads(session['user'])
-    rows, speed, next_button = get_history(user.get('userid'))
-    return render_template('index.html', rows=rows, speed=speed, next_button=next_button, name=" ".join([user['given_name'], user['family_name']]), picture=user['picture'])

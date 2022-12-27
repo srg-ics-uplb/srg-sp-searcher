@@ -37,6 +37,22 @@ def get_user_by_id(userid):
     print(e)
     pass
 
+# def get_user_info(userid):
+#   try:
+#     conn = conn_to_db()
+#     cursor = conn.execute("""
+#       SELECT userid, given_name, family_name, picture FROM USERS WHERE userid = '{}'
+#     """.format(
+#       userid
+#     ))
+#     user_data = cursor.fetchone()
+#     print(user_data)
+#     conn.close()
+#     return user_data
+#   except sqlite3.Error as e:
+#     print(e)
+#     pass
+
 
 def upsert_user(credentials):
   try:
@@ -58,7 +74,8 @@ def upsert_user(credentials):
       ))
     conn.commit()
     conn.close()
-    return get_user_by_id(credentials.get('userid'))
+    # return get_user_info(credentials.get('userid'))
+    return
   except sqlite3.Error as e:
     print(e)
     pass

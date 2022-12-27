@@ -1,117 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UPLB ICS | Peak One</title>
+{% extends 'base.html' %}
 
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/results.css') }}">
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/template.css') }}">
-</head>
-<body>
+{% block title %}{{ title }}{% endblock %}
 
-  <header>
+{% block main %}
+  {% if user_request%}
+    <h2>
+      Results for :
+      <span class="words-results">{{ user_request }}</span> 
+    </h2>
+  {% endif %}
+
+  <div class="words-results">
+  {% for row in rows %}
+  <div class="result">
     <div>
-      <a href="/"><h1>UPLB ICS Peak One</h1></a>
-      <form action="/search" method="GET">
-        <input type="text" id="s" name="s" placeholder="Maximum of 5 words" required>
-        <button type="submit" >Search</button>
-      </form>
-      <div id="profile">
-        <img src=" {{ picture }} " alt="User Profile" />
-        {{ name }}
-        <nav id="nav" class="hidden">
-          <a href="/history">History</a>
-          <a >Saved</a>
-          <a href="/logout">Logout</a>
-        </nav>
-      </div>
-    </div>
-  </header>
-
-  <main>
-      {% if user_request%}
-
-      <h2>
-        Results for :
-        <span class="words-results">{{ user_request }}</span> 
-      </h2>
-
-      {% endif %}
-      
-      <div class="words-results">
-      {% for row in rows %}
-      <div class="result">
-        <div>
-          <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
-            {{ row["title"] }}
-          </a>
-        </div>
-      
-        <div class="result__url">
-          <strong>{{ row["authors"] }}</strong>
-        </div>
-      
-        <div>
-          <p style="font-size: 1.2em">{{ row["abstract"] }}</p>
-        </div>
-      
-        <div class="result__description">
-          Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
-        </div>
-      
-      {% if allow_delete %}
-        <div class="result__url">
-        <strong><a href="/delete/{{ row['pdf_name'] }}">DELETE</a></strong>
-        </div>
-      {% endif %}
-      </div>
-      {% endfor %}
-      </div>
-
-      <!--
-      TODO : add a next button here if there are other results...
-      -->
-      
-      {% if next_button > 0 %}
-      <a href="/search?s={{ user_request }}&p={{ next_button }}" class="next-page">
-      Next page >
+      <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
+        {{ row["title"] }}
       </a>
-      {% endif %}
-      <br/><br/><br/>
-      Results found in <strong>{{ speed }}</strong><small> seconds.</small>.
-
-  </main>
-
-  <footer>
-    <div>
-      <div>
-        <h3>Institute of Computer Science</h3> <br>
-        1F Wing C, Francisco O. Santos Hall (formerly Physical Sciences Building), <br>
-        Harold Cuzner Avenue, University of the Philippines Los Baños, <br>
-        College, Los Baños, Laguna 4031 Philippines
-      </div>
-      <div>
-        <strong>Terms of Use</strong>: This service provides copyrighted materials. At least one of the authors authorized the use of their 
-          technical report under 'fair use' (Section 185,  <a href="https://www.officialgazette.gov.ph/1997/06/06/republic-act-no-8293/">R.A. 8293</a>) and thus made available here. Strictly for educational and non-commercial use only. Please do not upload the reports to other platforms.
-      </div>
-      <div>
-        <form action="/message" method="post">
-          <h3>Send us a message</h3>
-          <input type="email" id="email" name="email" placeholder="Enter your email" required>
-          <textarea id="message" name="message" maxlength="200" placeholder="Enter message here" required></textarea>
-          <input type="submit" value="Send">
-        </form>
-      </div>
-      <div align="center" style="grid-column: 1 / -1;">&#169; 2021 <a href="https://github.com/srg-ics-uplb/srg-tr-searcher">SRG-ICS-UPLB</a></div>
     </div>
-  </footer>
 
-  <script>
-    document.querySelector('#profile').addEventListener('click', () => {
-      document.querySelector('#nav').classList.toggle('hidden')
-    })
-  </script>
-</body>
-</html>
+    <div class="result__url">
+      <strong>{{ row["authors"] }}</strong>
+    </div>
+
+    <div>
+      <p style="font-size: 1.2em">{{ row["abstract"] }}</p>
+    </div>
+
+    <div class="result__description">
+      Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
+    </div>
+
+  {% if allow_delete %}
+    <div class="result__url">
+    <strong><a href="/delete/{{ row['pdf_name'] }}">DELETE</a></strong>
+    </div>
+  {% endif %}
+  </div>
+  {% endfor %}
+  </div>
+
+  <!--
+  TODO : add a next button here if there are other results...
+  -->
+
+  {% if next_button > 0 %}
+    <a href="/search?s={{ user_request }}&p={{ next_button }}" class="next-page">
+    Next page >
+    </a>
+  {% endif %}
+  <br/><br/><br/>
+  Results found in <strong>{{ speed }}</strong><small> seconds.</small>.
+
+{% endblock %}
