@@ -10,46 +10,91 @@
     </h2>
   {% endif %}
 
-  <div class="words-results">
-  {% for row in rows %}
-  <div class="result">
-    <div>
-      <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
-        {{ row["title"] }}
+  {% if not rows %}
+    <h1>No results found.</h1>
+  {% else %}
+    <div class="words-results">
+    {% for row in rows %}
+    <div class="result">
+      <div>
+        <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
+          {{ row["title"] }}
+        </a>
+      </div>
+
+      <div class="result__url">
+        <strong>{{ row["authors"] }}</strong>
+      </div>
+
+      <div>
+        <p style="font-size: 1.2em">{{ row["abstract"] }}</p>
+      </div>
+
+      <div class="result__description">
+        
+        <!-- {% if row["id"] in favorites %}
+          <a href="/save/{{ row['title'] }}" class="visited">
+            Remove from favorites
+          </a>
+        {% else %}
+          <a href="/save/{{ row['title'] }}" class="active">
+            Add to favorites
+          </a>
+        {% endif %} -->
+
+        <a class="favorite-link" id="{{ row['id'] }}"></a>
+
+        Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
+      </div>
+
+    {% if allow_delete %}
+      <div class="result__url">
+      <strong><a href="/delete/{{ row['pdf_name'] }}">DELETE</a></strong>
+      </div>
+    {% endif %}
+    </div>
+    {% endfor %}
+    </div>
+
+    <!--
+    TODO : add a next button here if there are other results...
+    -->
+
+    {% if next_button > 0 %}
+      <a href="/search?s={{ user_request }}&p={{ next_button }}" class="next-page">
+      Next page >
       </a>
-    </div>
-
-    <div class="result__url">
-      <strong>{{ row["authors"] }}</strong>
-    </div>
-
-    <div>
-      <p style="font-size: 1.2em">{{ row["abstract"] }}</p>
-    </div>
-
-    <div class="result__description">
-      Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
-    </div>
-
-  {% if allow_delete %}
-    <div class="result__url">
-    <strong><a href="/delete/{{ row['pdf_name'] }}">DELETE</a></strong>
-    </div>
+    {% endif %}
+    <br/><br/><br/>
+    Results found in <strong>{{ speed }}</strong><small> seconds.</small>.
   {% endif %}
-  </div>
-  {% endfor %}
-  </div>
 
-  <!--
-  TODO : add a next button here if there are other results...
-  -->
+  <script>
+    let favorites = {{ favorites }};
 
-  {% if next_button > 0 %}
-    <a href="/search?s={{ user_request }}&p={{ next_button }}" class="next-page">
-    Next page >
-    </a>
-  {% endif %}
-  <br/><br/><br/>
-  Results found in <strong>{{ speed }}</strong><small> seconds.</small>.
+    updateFavoriteLinks();
 
+    document.querySelectorAll('.favorite-link').forEach( elem => {
+      elem.addEventListener('click', ev => {
+        ev.preventDefault();
+        fetch('http://localhost:5000/save/' + ev.target.id)
+          .then( response => response.json())
+          .then( data => {
+            favorites = data.favorites;
+            updateFavoriteLinks();
+          })
+          .catch( err =>{
+            console.log(err);
+          })
+      })
+    })
+
+    function updateFavoriteLinks() {
+      document.querySelectorAll('.favorite-link').forEach( elem => {
+        elem.textContent = favorites.includes(parseInt(elem.id))
+                        ? 'Remove from favorites'
+                        : 'Add to favorites';
+      })
+    }
+  </script>
 {% endblock %}

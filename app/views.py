@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, abort, session, send_from_directory, send_file, make_response
+from flask import Flask, render_template, request, redirect, url_for, abort, session, send_from_directory, send_file, make_response, jsonify
 from werkzeug.utils import secure_filename
 from app import app
 from time import time
@@ -54,7 +54,7 @@ def search_page():
 
     #words = map(lemmatize, words)
     
-    print(words)
+    # print(words)
 
     if not words:
         # return render_template('index.html')
@@ -65,17 +65,13 @@ def search_page():
     if next_button:
         next_button = page + 1
 
-    if app.config['ALLOW_DELETE']:
-        return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
+    # if app.config['ALLOW_DELETE']:
+    #     return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
 
-    if session['user']:
-        userData = json.loads(session['user'])
-        user = {
-            "name": userData['given_name'] + " " + userData['family_name'],
-            "picture": userData['picture']
-        }
-        return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, user=user)
-    return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
+    # if session['user']:
+    user = json.loads(session['user'])
+    return render_template('index.html', title='Search', user_request=query, rows=rows, speed=speed, next_button=next_button, user=user)
+    # return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
 
 # @app.route('/upload', methods=['GET'])
 # def upload_page():
@@ -142,11 +138,11 @@ def uploaded_page():
             print(traceback.format_exc())
             return "This is not a pdf... <a href='/search'>search</a>." 
 
-        pdf_id = insert_pdf_to_db(file_name,title,authors,year,month,abstract,index_terms) #add the pdf to the database 
+        pdfid = insert_pdf_to_db(file_name,title,authors,year,month,abstract,index_terms) #add the pdf to the database 
         total_words = sum(counter.values())
         for word in counter: #update the words in database
-            insert_word_to_db(pdf_id, word, counter[word] / float(total_words))
-        return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdf_id))
+            insert_word_to_db(pdfid, word, counter[word] / float(total_words))
+        return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdfid))
     except:
         return "Fail to uploadi."
 
@@ -156,7 +152,7 @@ def del_pdf(pdf_name):
     if not app.config['ALLOW_DELETE']:
         return "Delete is disabled. Back to <a href='/search'>search</a>." 
 
-    pdf_id=delete_from_db(pdf_name)
+    pdfid=delete_from_db(pdf_name)
     #get the path to the target pdf
     input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
     os.remove(input_file)
@@ -171,9 +167,7 @@ def bibtex(pdf_name):
 @app.route('/pdf/<pdf_name>')
 def return_pdf(pdf_name):
     try:
-        # print(session['user'])
-        user = json.loads(session['user'])
-        add_pdf_to_view_history(pdf_name, user.get('userid'))
+        add_pdf_to_view_history(pdf_name, session['userid'])
         #get current date and time in PH
         datetime_ph = datetime.now(pytz.timezone('Asia/Manila'))
         download_date=datetime_ph.strftime("%Y-%m-%d %H:%M:%S %Z %z" )        
@@ -243,16 +237,24 @@ def check_auth():
 
 @app.route('/', methods=['GET'])
 def index():
-    rows, speed, next_button = get_recents()
     user = json.loads(session['user'])
-    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, user=user)
+    favorites = session['favorites']
+    rows, speed, next_button = get_recents()
+    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, user=user, favorites=favorites)
 
 @app.route('/history', methods=['GET'])
-def history():
+def history_page():
     user = json.loads(session['user'])
-    userid = session['token']
-    rows, speed, next_button = get_history(userid)
-    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, user=user)
+    favorites = session['favorites']
+    rows, speed, next_button = get_history(session['userid'])
+    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, user=user, favorites=favorites)
+
+@app.route('/favorites', methods=['GET'])
+def favorites_page():
+    user = json.loads(session['user'])
+    favorites = session['favorites']
+    rows, speed, next_button = get_favorites(session['userid'])
+    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, user=user, favorites=favorites)
     
 @app.route('/upload', methods=['GET'])
 def upload_page():
@@ -260,6 +262,14 @@ def upload_page():
     if not app.config['ALLOW_UPLOAD']:
         return render_template('index.html')
     return render_template('upload.html', user=user)
+
+
+@app.route('/save/<pdfid>', methods=['GET'])
+def toggle_favorites(pdfid):
+    session['favorites'] = toggle_pdf_favorite(int(pdfid), session['userid'])
+    return jsonify({ 'favorites' : session['favorites'] })
+
+
 
 
 # auth routes
@@ -276,12 +286,14 @@ def callback():
     user_google_data = verify_token(credential)
     if user_google_data:
         upsert_user(user_google_data)
+        favorites = get_favorites(user_google_data['userid'])
         user = {
             "name": user_google_data['given_name'] + " " + user_google_data['family_name'],
             "picture": user_google_data['picture']
         }
         session['user'] = json.dumps(user)
-        session['token'] = user_google_data['userid']
+        session['userid'] = user_google_data['userid']
+        session['favorites'] = get_user_favorites(user_google_data['userid'])
     
     return redirect('/')
 

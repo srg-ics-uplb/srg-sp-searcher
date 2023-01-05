@@ -1,15 +1,15 @@
-/* :root {
-  --bg-color: #131313;
-  --font-color: #cdcdcd;
-  --bg2-color: #777;
-} */
+:root {
+  --bg-color: #fff;
+  --bg2-color: #cdcdcd;
+  --font-color: #131313;
+  --font2-color: #000;
+}
 
-/* @media (prefers-color-scheme: light) { */
+/* @media (prefers-color-scheme: light) {
   :root {
     --bg-color: #cdcdcd;
-    --font-color: #131313;
   }
-/* } */
+} */
 
 
 /* * { outline: 1px solid red; } */
@@ -29,6 +29,7 @@ body {
 header {
   width: 100vw;
   background-color: var(--bg2-color);
+  color: var(--font2-color);
 }
 
 header > div {
@@ -88,7 +89,7 @@ header nav {
   width: 100%;
   overflow: hidden;
   position: absolute;
-  bottom: -7em;
+  bottom: -9em;
 
   border: 1px solid black;
   border-radius: .5em;
@@ -158,4 +159,9 @@ footer form textarea {
 
 .hidden {
   display: none;
+}
+
+
+.favorite-link {
+  cursor: pointer;
 }

@@ -40,12 +40,12 @@ main .upload-link {
   float:right;
 }
 
-main form {
-  /* position: absolute;
+/* main form {
+  position: absolute;
   top: 0;
   right: 0;
   bottom: 0;
-  left: 0; */
+  left: 0;
   margin: auto;
   display: -webkit-box;
   display: -webkit-flex;
@@ -107,4 +107,45 @@ main form .search {
 main form .search:hover {
   background-color: #564f5d;
 }
+ */
 
+.upload {
+  width: min(600px, 100%);
+  margin: 0 auto;
+}
+
+.upload form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .5em;
+}
+
+.upload form label {
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+.upload form input,
+.upload form textarea,
+.upload form select {
+  font-size: 1.2em;
+  padding: .5em 1em;
+  margin-bottom: 1em;
+  /* border-radius: .5em; */
+}
+
+.upload form textarea {
+  font-family: sans-serif;
+  resize: none;
+  height: 5em;
+}
+
+.upload form input[type='submit'] {
+  cursor: pointer;
+  width: max-content;
+  margin: 0 auto;
+  background-color: green;
+  color: white;
+  font-weight: 700;
+  border: none;
+}
