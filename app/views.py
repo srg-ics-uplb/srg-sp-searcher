@@ -21,13 +21,13 @@ import io
 import random
 import unicodedata
 
-@app.route('/static/pdf/<path:filename>')
-def protected(filename):
-    pdf_file=os.path.join(app.root_path,'static',app.config['PDF_DIR'])
-    #pdf_file=os.path.join(app.instance_path,'static',app.config['PDF_DIR'])
+# @app.route('/static/pdf/<path:filename>')
+# def protected(filename):
+#     pdf_file=os.path.join(app.root_path,'static',app.config['PDF_DIR'])
+#     #pdf_file=os.path.join(app.instance_path,'static',app.config['PDF_DIR'])
 
-    print(pdf_file,filename)
-    return send_from_directory(pdf_file,filename)
+#     print(pdf_file,filename)
+#     return send_from_directory(pdf_file,filename)
 
 @app.route('/search', methods=['GET'])
 def search_page():
@@ -69,7 +69,8 @@ def search_page():
     #     return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
 
     # if session['user']:
-    user = json.loads(session['user'])
+    # user = json.loads(session['user'])
+    user = session['user']
     return render_template('index.html', title='Search', user_request=query, rows=rows, speed=speed, next_button=next_button, user=user)
     # return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
 
@@ -147,16 +148,16 @@ def uploaded_page():
         return "Fail to uploadi."
 
 
-@app.route('/delete/<pdf_name>')
-def del_pdf(pdf_name):
-    if not app.config['ALLOW_DELETE']:
-        return "Delete is disabled. Back to <a href='/search'>search</a>." 
+# @app.route('/delete/<pdf_name>')
+# def del_pdf(pdf_name):
+#     if not app.config['ALLOW_DELETE']:
+#         return "Delete is disabled. Back to <a href='/search'>search</a>." 
 
-    pdfid=delete_from_db(pdf_name)
-    #get the path to the target pdf
-    input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
-    os.remove(input_file)
-    return pdf_name+" has been deleted. Back to <a href='/search'>search</a>."
+#     pdfid=delete_from_db(pdf_name)
+#     #get the path to the target pdf
+#     input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
+#     os.remove(input_file)
+#     return pdf_name+" has been deleted. Back to <a href='/search'>search</a>."
 
 
 @app.route('/bibtex/<pdf_name>')
@@ -225,49 +226,97 @@ def make_temp_file(suffix):
 
 @app.before_request
 def check_auth():
-    if request.path.startswith('/static/styles'):
+    AUTH_PATHS = ['/login', '/callback', '/register', '/logout']
+    if request.path.startswith('/static/styles') or request.path == '/favicon.ico':
         return
     print("{} {}".format(request.method, request.path))
-    if request.path in ['/login', '/callback']:
+    if request.path in AUTH_PATHS:
         return
-    if not session or not session['user']:
+    if not session or not session.get('user'):
         return redirect('/login')
+    # user = session.get('user')
+    # if not user.get('campus') or not user.get('college') or not user.get('department'):
+    #     return redirect('/register')
     return
 
 
+
+# page routes
 @app.route('/', methods=['GET'])
 def index():
-    user = json.loads(session['user'])
-    favorites = session['favorites']
     rows, speed, next_button = get_recents()
-    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, user=user, favorites=favorites)
+    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, user=session.get('user'), favorites=session.get('favorites'))
 
 @app.route('/history', methods=['GET'])
 def history_page():
-    user = json.loads(session['user'])
-    favorites = session['favorites']
-    rows, speed, next_button = get_history(session['userid'])
-    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, user=user, favorites=favorites)
+    rows, speed, next_button = get_history(session.get('userid'))
+    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, user=session.get('user'), favorites=session.get('favorites'))
 
 @app.route('/favorites', methods=['GET'])
 def favorites_page():
-    user = json.loads(session['user'])
-    favorites = session['favorites']
-    rows, speed, next_button = get_favorites(session['userid'])
-    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, user=user, favorites=favorites)
+    rows, speed, next_button = get_favorites(session.get('userid'))
+    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, user=session.get('user'), favorites=session.get('favorites'))
     
 @app.route('/upload', methods=['GET'])
 def upload_page():
-    user = json.loads(session['user'])
-    if not app.config['ALLOW_UPLOAD']:
-        return render_template('index.html')
-    return render_template('upload.html', user=user)
+    # if not app.config['ALLOW_UPLOAD']:
+    if get_upload_permission(get_userid_by_email(session.get('user').get('email'))):
+        return render_template('upload.html', title='Upload', user=session.get('user'))
+    return redirect('/')
+
+@app.route('/register', methods=['GET'])
+def register():
+    return redirect('/')
+    return render_template('register.html', title='Signup', user=session['user'])
 
 
-@app.route('/save/<pdfid>', methods=['GET'])
-def toggle_favorites(pdfid):
-    session['favorites'] = toggle_pdf_favorite(int(pdfid), session['userid'])
-    return jsonify({ 'favorites' : session['favorites'] })
+
+# api routes
+@app.route('/api/user/saved-trs/<pdfid>', methods=['PUT'])
+def edit_favorites(pdfid):
+    session['favorites'] = toggle_pdf_favorite(int(pdfid), session.get('userid'))
+    print(session.get('favorites'))
+    return jsonify({ 'favorites' : session.get('favorites'), 'status' : 200 })
+
+@app.route('/api/pdf/<pdfid>', methods=['DELETE'])
+def delete_pdf_endpoint(pdfid):
+    if get_delete_permission(session.get('userid')):
+        pdf_name = get_pdf_name_by_id(pdfid)
+        # delete_from_db(pdf_name)
+        return jsonify({ 'status': 200, 'message': 'PDF {} successfully deleted from database.'.format(pdf_name)})
+    abort(403)
+    
+
+@app.route('/register', methods=['POST'])
+def register_user():
+    user = { 
+        **(session.get('user')),
+        "campus"      : request.form.get('campus'),
+        "college"     : request.form.get('college'),
+        "department"  : request.form.get('department'),
+        "user_type"   : request.form.get('user_type')
+    }
+    upsert_user({**user, "userid": session.get('userid')})
+    session['user'] = user
+    session['favorites'] = get_user_favorites(session.get('userid'))
+    return redirect('/')
+
+@app.route('/api/user/<username>/delete-permit', methods=['PUT'])
+def toggle_delete_permission(username):
+    # check if current user has admin privileges
+    userid = get_userid_by_email(session.get('user').get('email'))
+
+    set_user = get_userid_by_email("{}@up.edu.ph".format(username))
+    allow_delete = set_delete_permission(set_user, not int(get_delete_permission(set_user)))
+
+    return jsonify({ 'status': 200, 'message': 'User delete permit changed.', 'deletePermit': allow_delete })
+
+@app.route('/api/user/<username>/upload-permit', methods=['PUT'])
+def toggle_upload_permission(username):
+    set_user = get_userid_by_email("{}@up.edu.ph".format(username))
+    allow_upload = set_upload_permission(set_user, not int(get_upload_permission(set_user)))
+
+    return jsonify({ 'status': 200, 'message': 'User upload permit changed.', 'uploadPermit': allow_upload })
 
 
 
@@ -285,19 +334,26 @@ def callback():
     credential = request.form.get('credential')
     user_google_data = verify_token(credential)
     if user_google_data:
-        upsert_user(user_google_data)
-        favorites = get_favorites(user_google_data['userid'])
-        user = {
-            "name": user_google_data['given_name'] + " " + user_google_data['family_name'],
-            "picture": user_google_data['picture']
-        }
-        session['user'] = json.dumps(user)
+        user = upsert_user(user_google_data)
+        session['user'] = { **user, "name" : user.get('given_name') + " " + user.get('family_name')}
         session['userid'] = user_google_data['userid']
-        session['favorites'] = get_user_favorites(user_google_data['userid'])
-    
+
     return redirect('/')
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    session['user'] = None
+    session = None
     return redirect('/login')
+
+
+
+# admin routes
+@app.route('/admin', methods=['GET'])
+def admin_page():
+    users = list_users()
+    new_users = []
+    for user in users:
+        new_user = { **user, 'username': user.get('email')[:-10] }
+        new_users.append(new_user)
+    
+    return render_template('admin.html', title="Admin", users = new_users, user=session.get('user'))

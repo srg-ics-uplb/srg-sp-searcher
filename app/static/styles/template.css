@@ -84,9 +84,7 @@ header > div > div img {
 header nav {
   display: flex;
   flex-flow: nowrap column;
-  align-items: center;
 
-  width: 100%;
   overflow: hidden;
   position: absolute;
   bottom: -9em;
@@ -101,6 +99,7 @@ header nav a {
   padding: .5em;
   box-sizing: border-box;
   color: var(--bg-color);
+  white-space: nowrap;
 }
 
 header nav a:hover {
@@ -112,6 +111,10 @@ header nav a:hover {
 main {
   width: min(90vw, 1600px);
   margin: 3em auto;
+
+  display: grid;
+  justify-content: center;
+  align-items: center;
 }
 
 footer {
@@ -161,7 +164,53 @@ footer form textarea {
   display: none;
 }
 
-
+.delete-link,
 .favorite-link {
   cursor: pointer;
+}
+
+main form {
+  width: min(800px, 90%);
+  margin: 0 auto;
+  padding: 2em;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1em;
+}
+
+main form div {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: .5em;
+}
+
+main form .radio-container {
+  all: unset;
+}
+
+main form input,
+main form select,
+main form option {
+  padding: .5em 1em;
+}
+
+main form input[type="submit"] {
+  all: unset;
+  cursor: pointer;
+  width: max-content;
+  padding: .5em 1em;
+  margin: 0 auto;
+  color: white;
+  font-weight: bold;
+  background-color:green;
+}
+
+main button {
+  all: unset;
+  cursor: pointer;
+  border-radius: .5em;
+  padding: .5em 1em;
+  font-weight: bold;
+  color: white;
+  background-color: green;
 }

@@ -9,7 +9,7 @@ from app import app
 # import traceback
 
 def db_execute(sql):
-  print(sql)
+  # print(sql)
   try:
     data = []
 
@@ -97,21 +97,27 @@ def get_pdfid_by_name(name):
   pdfid = data[0]
   return pdfid
 
+def get_pdf_name_by_id(pdfid):
+  sql = "SELECT NAME FROM PDF WHERE ID = '{}'".format(pdfid)
+  data = db_execute(sql)[0]
+  pdf_name = data[0]
+  return pdf_name
+
 def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
   pdfs = []
   sql = """
-        SELECT PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
-        FROM (SELECT PDF_ID, WORD, W_FREQ
+        SELECT ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
+        FROM (SELECT ID, WORD, W_FREQ
               FROM FREQ
               WHERE WORD IN ({}))
           INNER JOIN
-             (SELECT PDF_ID AS P2, WORD AS W2, {} / COUNT(PDF_ID) AS TIDF
+             (SELECT ID AS P2, WORD AS W2, {} / COUNT(ID) AS TIDF
               FROM FREQ WHERE W2 IN ({})
               GROUP BY W2) ON WORD = W2
           INNER JOIN
              (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
-              FROM PDF) ON ID = PDF_ID
-        GROUP BY PDF_ID
+              FROM PDF) ON ID = ID
+        GROUP BY ID
         ORDER BY SCORE DESC
         LIMIT {} OFFSET {}
       """.format(ws, str(float(nb_pdf)), ws, nb_max_by_pages, nb_max_by_pages * page)
@@ -133,3 +139,6 @@ def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
     })
 
   return pdfs, end_time - start_time, False
+
+def get_recents(limit=3, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
+    return get_most_recents(limit, page)

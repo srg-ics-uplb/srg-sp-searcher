@@ -13,6 +13,10 @@
   margin-left: 10px;
 } */
 
+.hidden {
+  display: none;
+}
+
 .next-page {
   text-transform: uppercase;
   text-align: center;

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS USERS (
   department        TEXT,
   college           TEXT,
   campus            TEXT,
+  user_type         TEXT,
   allow_upload      BOOLEAN DEFAULT FALSE,
   allow_delete      BOOLEAN DEFAULT FALSE,
   view_history      TEXT DEFAULT '[]',

@@ -7,10 +7,12 @@
     </form>
     {% if user %}
       <div id="profile">
-        <img src={{ user['picture'] }} alt="User Profile" />
+        <img src="{{ user.get('picture') }}" alt="User Profile" />
         {{ user['name'] }}
         <nav id="nav" class="hidden">
-          <a href="/upload">Add Research Paper</a>
+          {% if user['allow_upload'] == 1 %}
+            <a href="/upload">Add Research Paper</a>
+          {% endif %}
           <a href="/favorites">Saved</a>
           <a href="/history">History</a>
           <a href="/logout">Logout</a>

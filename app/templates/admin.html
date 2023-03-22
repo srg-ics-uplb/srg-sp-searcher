@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main %}
+  <table rules="all">
+    <thead>
+      <th>Email</th>
+      <th>Name</th>
+      <th>Upload</th>
+      <th>Delete</th>
+    </thead>
+    <tbody>
+      {% for user in users %}
+        {% set username = user['email'] %}
+        <tr>
+          <td>{{ user.get('email') }}</td>
+          <td>{{ user.get('name') }}</td>
+          <!-- <td>{{ user.get('allow_upload') }}</td> -->
+          <td><button class="upload-btn" id="{{ user.get('username') }}-upload">
+            {% if user.get('allow_upload') == 0 %}
+              Not Allowed
+            {% elif user.get('allow_upload') == 1 %}
+              Allowed
+            {% endif %}
+          </button></td>
+          <!-- <td>{{ user.get('allow_delete') }}</td> -->
+          <td><button class="delete-btn" id="{{ user.get('username') }}-delete">
+            {% if user.get('allow_delete') == 0 %}
+              Not Allowed
+            {% elif user.get('allow_delete') == 1 %}
+              Allowed
+            {% endif %}
+          </button></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    const baseUrl = 'http://localhost:5000';
+    let users = {{ users|tojson|safe }};
+
+    document.querySelectorAll(`.delete-btn`).forEach( btn => {
+      let username = btn.id.slice(0, -7);
+      let user = users.filter( user => user.username === username)[0];
+
+      btn.style.backgroundColor = user['allow_delete'] ? 'green' : 'red';
+
+      btn.addEventListener('click', ev => {
+        ev.preventDefault();
+        let defaultTxt = btn.textContent;
+        btn.textContent = 'Loading...';
+        fetch(`${baseUrl}/api/user/${username}/delete-permit`, {
+          method: 'PUT'
+        })
+          .then( response => response.json())
+          .then( data => {
+            updatePermit(btn, data.deletePermit)
+          })
+          .catch( err => {
+            console.log(err)
+            btn.textContent = defaultTxt;
+          })
+      }) 
+    })
+
+    document.querySelectorAll(`.upload-btn`).forEach( btn => {
+      let username = btn.id.slice(0, -7);
+      let user = users.filter( user => user.username === username)[0];
+
+      btn.style.backgroundColor = user['allow_upload'] ? 'green' : 'red';
+
+      btn.addEventListener('click', ev => {
+        ev.preventDefault();
+        let defaultTxt = btn.txtContent;
+        btn.textContent = 'Loading...';
+        fetch(`${baseUrl}/api/user/${username}/upload-permit`, {
+          method: 'PUT'
+        })
+          .then( response => response.json())
+          .then( data => {
+            updatePermit(btn, data.uploadPermit)
+          })
+          .catch( err => {
+            console.log(err)
+            btn.textContent = defaultTxt;
+          })
+      })
+    })
+
+    function updatePermit(elem, permit) {
+      elem.textContent = permit 
+        ? 'Allowed'
+        : 'Not Allowed';
+      elem.style.backgroundColor = permit
+        ? 'green'
+        : 'red';
+    }
+  </script>
+{% endblock %}

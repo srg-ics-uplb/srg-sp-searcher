@@ -15,7 +15,7 @@
   {% else %}
     <div class="words-results">
     {% for row in rows %}
-    <div class="result">
+    <div class="result" id="{{ row['id'] }}">
       <div>
         <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
           {{ row["title"] }}
@@ -31,20 +31,15 @@
       </div>
 
       <div class="result__description">
-        
-        <!-- {% if row["id"] in favorites %}
-          <a href="/save/{{ row['title'] }}" class="visited">
-            Remove from favorites
-          </a>
-        {% else %}
-          <a href="/save/{{ row['title'] }}" class="active">
-            Add to favorites
-          </a>
-        {% endif %} -->
 
-        <a class="favorite-link" id="{{ row['id'] }}"></a>
-
+        <a class="favorite-link"></a>
+        |
+        {% if user.get('allow_delete') == 1 %}
+        <a class="delete-link">Delete</a>
+        |
+        {% endif %}
         Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
+
       </div>
 
     {% if allow_delete %}
@@ -70,18 +65,21 @@
   {% endif %}
 
   <script>
-    let favorites = {{ favorites }};
+    let favorites = {{ favorites|tojson|safe }};
 
     updateFavoriteLinks();
 
     document.querySelectorAll('.favorite-link').forEach( elem => {
       elem.addEventListener('click', ev => {
         ev.preventDefault();
-        fetch('http://localhost:5000/save/' + ev.target.id)
+        fetch(
+          'http://localhost:5000/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
+          { method: 'PUT'}
+        )
           .then( response => response.json())
           .then( data => {
             favorites = data.favorites;
-            updateFavoriteLinks();
+            updateFavoriteLink(elem);
           })
           .catch( err =>{
             console.log(err);
@@ -89,12 +87,36 @@
       })
     })
 
+    document.querySelectorAll('.delete-link').forEach( elem => {
+      elem.addEventListener('click', ev => {
+        ev.preventDefault();
+        document.getElementById(ev.target.parentElement.parentElement.id).classList.add('hidden');
+        fetch(
+          'http://localhost:5000/api/pdf/' + ev.target.parentElement.parentElement.id, 
+          { method: 'DELETE' }
+        )
+          .then( response => response.json())
+          .then( data => {
+            console.log(data)
+            alert('Successfully deleted pdf from database.')
+          })
+          .catch( err => {
+            alert('User does not have delete privileges.');
+            document.getElementById(ev.target.parentElement.parentElement.id).classList.remove('hidden');
+          })
+      })
+    })
+
     function updateFavoriteLinks() {
       document.querySelectorAll('.favorite-link').forEach( elem => {
-        elem.textContent = favorites.includes(parseInt(elem.id))
-                        ? 'Remove from favorites'
-                        : 'Add to favorites';
+        updateFavoriteLink(elem)
       })
+    }
+
+    function updateFavoriteLink(elem) {
+      elem.textContent = favorites.includes(parseInt(elem.parentElement.parentElement.id))
+                      ? 'Remove from favorites'
+                      : 'Add to favorites';
     }
   </script>
 {% endblock %}

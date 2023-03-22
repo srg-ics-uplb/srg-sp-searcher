@@ -9,7 +9,7 @@ from app import app
 # import traceback
 
 def db_execute(sql):
-  print(sql)  
+  # print(sql)  
   try:
     data = []
 
@@ -34,7 +34,6 @@ def get_user_by_id(userid):
   sql = "SELECT * FROM USERS WHERE userid = '{}'".format(userid)
   user_data = db_execute(sql)[0]
   user = {
-    "userid"        : user_data[0],
     "email"         : user_data[1],
     "given_name"    : user_data[2],
     "family_name"   : user_data[3],
@@ -45,6 +44,11 @@ def get_user_by_id(userid):
     "saved_trs"     : user_data[8]
   }
   return user
+
+def get_userid_by_email(email):
+  sql = "SELECT userid FROM USERS WHERE email = '{}'".format(email)
+  userid = db_execute(sql)[0]
+  return userid[0]
 
 def upsert_user(credentials):
   sql = """
@@ -63,7 +67,7 @@ def upsert_user(credentials):
       picture = credentials.get('picture')
     )
   db_execute(sql)
-  return
+  return get_user_by_id(credentials.get('userid'))
   
 def get_view_history(userid):
   sql = "SELECT view_history FROM USERS WHERE userid = '{}'".format(userid)
@@ -106,3 +110,39 @@ def update_user_favorites(userid, favorites):
     )
   db_execute(sql)
   return
+
+def get_delete_permission(userid):
+  sql = "SELECT allow_delete FROM USERS WHERE userid = '{}'".format(userid)
+  data = db_execute(sql)[0]
+  return data[0]
+
+def set_delete_permission(userid, permit):
+  sql = "UPDATE USERS SET allow_delete = '{}' WHERE userid = '{}'".format(int(permit), userid)
+  db_execute(sql)
+  data = get_delete_permission(userid)
+  return data
+
+def get_upload_permission(userid):
+  sql = "SELECT allow_upload FROM USERS WHERE userid = '{}'".format(userid)
+  data = db_execute(sql)[0]
+  return data[0]
+
+def set_upload_permission(userid, permit):
+  sql = "UPDATE USERS SET allow_upload = '{}' WHERE userid = '{}'".format(int(permit), userid)
+  db_execute(sql)
+  data = get_upload_permission(userid)
+  return data
+
+
+def list_users():
+  users = []
+  sql = "SELECT email, given_name, family_name, allow_upload, allow_delete FROM USERS"
+  data = db_execute(sql)
+  for row in data:
+    users.append({
+      "email":          row[0],
+      "name":           "{} {}".format(row[1], row[2]),
+      "allow_upload":   row[3],
+      "allow_delete":   row[4]
+    })
+  return users
