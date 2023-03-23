@@ -49,12 +49,12 @@ def pdf_allready_exists(pdf_name):
     conn.close()
     return False
 
-def insert_pdf_to_db(pdf_name,title,authors,year,month,abstract,index_terms):
+def insert_pdf_to_db(pdf_name,title,authors,year,month,abstract,index_terms,userid):
     # insert a pdf into the database and return his id
     path = app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'] + pdf_name
     conn = conn_to_db('pdf.db')
-    cursor = conn.execute("INSERT INTO PDF (NAME, HASH, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT, INDEX_TERMS ) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
-                                            pdf_name, hash_file(path), int(time()), title, authors, year, month, abstract, index_terms))
+    cursor = conn.execute("INSERT INTO PDF (NAME, HASH, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT, INDEX_TERMS, UPLOADED_BY) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+                                            pdf_name, hash_file(path), int(time()), title, authors, year, month, abstract, index_terms, userid))
     conn.commit()
     pdf_id = cursor.lastrowid
     conn.close()

@@ -31,7 +31,7 @@ def db_execute(sql):
     conn.close()
 
 def get_user_by_id(userid):
-  sql = "SELECT * FROM USERS WHERE userid = '{}'".format(userid)
+  sql = "SELECT userid, email, given_name, family_name, picture, allow_upload, allow_delete, view_history, saved_trs, user_type FROM USERS WHERE userid = '{}'".format(userid)
   user_data = db_execute(sql)[0]
   user = {
     "email"         : user_data[1],
@@ -41,7 +41,8 @@ def get_user_by_id(userid):
     "allow_upload"  : user_data[5],
     "allow_delete"  : user_data[6],
     "view_history"  : user_data[7],
-    "saved_trs"     : user_data[8]
+    "saved_trs"     : user_data[8],
+    "user_type"     : user_data[9],
   }
   return user
 

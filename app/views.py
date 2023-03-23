@@ -96,6 +96,7 @@ def uploaded_page():
         month = request.form['month']
         abstract = request.form['abstract']
         index_terms = request.form['index_terms']
+        userid = session.get('userid')
 
         uploaded_file = request.files['file']
         file_name = uploaded_file.filename
@@ -139,12 +140,14 @@ def uploaded_page():
             print(traceback.format_exc())
             return "This is not a pdf... <a href='/search'>search</a>." 
 
-        pdfid = insert_pdf_to_db(file_name,title,authors,year,month,abstract,index_terms) #add the pdf to the database 
+        pdfid = insert_pdf_to_db(file_name,title,authors,year,month,abstract,index_terms,userid) #add the pdf to the database 
         total_words = sum(counter.values())
         for word in counter: #update the words in database
             insert_word_to_db(pdfid, word, counter[word] / float(total_words))
-        return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdfid))
+        return redirect('/')
+        # return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdfid))
     except:
+        abort(408)
         return "Fail to uploadi."
 
 
@@ -229,11 +232,15 @@ def check_auth():
     AUTH_PATHS = ['/login', '/callback', '/register', '/logout']
     if request.path.startswith('/static/styles') or request.path == '/favicon.ico':
         return
+    if request.path.startswith('/admin') and session.get('user').get('user_type') != 'ADMIN':
+        return redirect('/')
     print("{} {}".format(request.method, request.path))
     if request.path in AUTH_PATHS:
         return
     if not session or not session.get('user'):
         return redirect('/login')
+    session['user'] = get_user_by_id(session.get('userid'))
+    session['user']['name'] = session.get('user').get('given_name') + " " + session.get('user').get('family_name')
     # user = session.get('user')
     # if not user.get('campus') or not user.get('college') or not user.get('department'):
     #     return redirect('/register')
@@ -285,7 +292,6 @@ def delete_pdf_endpoint(pdfid):
         # delete_from_db(pdf_name)
         return jsonify({ 'status': 200, 'message': 'PDF {} successfully deleted from database.'.format(pdf_name)})
     abort(403)
-    
 
 @app.route('/register', methods=['POST'])
 def register_user():
@@ -335,7 +341,7 @@ def callback():
     user_google_data = verify_token(credential)
     if user_google_data:
         user = upsert_user(user_google_data)
-        session['user'] = { **user, "name" : user.get('given_name') + " " + user.get('family_name')}
+        session['user'] = { **user, "name" : user.get('given_name') + " " + user.get('family_name') }
         session['userid'] = user_google_data['userid']
 
     return redirect('/')
