@@ -30,6 +30,12 @@ def db_execute(sql):
   finally:
     conn.close()
 
+def get_pdf_count():
+  sql = 'SELECT COUNT(id) FROM PDF'
+  data = db_execute(sql)
+
+  return data[0][0]
+
 def get_most_recents(limit=3, page=0):
   sql = """
       SELECT
@@ -56,7 +62,9 @@ def get_most_recents(limit=3, page=0):
       "score"     : 0
     })
 
-  return pdfs, end_time - start_time, False #pdfs list, time took to process and False for telling to not display a "next button"
+  next_button = set_next_button(get_pdf_count(), page + 1, limit)
+
+  return pdfs, end_time - start_time, next_button #pdfs list, time took to process and False for telling to not display a "next button"
 
 def get_pdfs_by_ids(pdfid_list,limit=8,page=0):
   pdfs = []
@@ -106,18 +114,18 @@ def get_pdf_name_by_id(pdfid):
 def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
   pdfs = []
   sql = """
-        SELECT ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
-        FROM (SELECT ID, WORD, W_FREQ
+        SELECT A.PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
+        FROM (SELECT PDF_ID, WORD, W_FREQ
               FROM FREQ
-              WHERE WORD IN ({}))
+              WHERE WORD IN ({})) A
           INNER JOIN
              (SELECT ID AS P2, WORD AS W2, {} / COUNT(ID) AS TIDF
               FROM FREQ WHERE W2 IN ({})
-              GROUP BY W2) ON WORD = W2
+              GROUP BY W2) B ON A.WORD = B.W2
           INNER JOIN
              (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
-              FROM PDF) ON ID = ID
-        GROUP BY ID
+              FROM PDF) C ON A.PDF_ID = C.ID
+        GROUP BY A.PDF_ID
         ORDER BY SCORE DESC
         LIMIT {} OFFSET {}
       """.format(ws, str(float(nb_pdf)), ws, nb_max_by_pages, nb_max_by_pages * page)
@@ -128,6 +136,7 @@ def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
 
   for row in data:
     pdfs.append({
+      "id"       : row[0],
       "pdf_name" : row[1],
       "date"     : format(datetime.fromtimestamp(row[2]), '%d/%m/%Y'),
       "score"    : row[4] * 100,
@@ -138,7 +147,18 @@ def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
       "abstract" : row[9]
     })
 
-  return pdfs, end_time - start_time, False
+  sql = "SELECT COUNT(*) FROM FREQ WHERE WORD IN ({})".format(ws)
+  count = db_execute(sql)[0][0]
+  print(count)
 
-def get_recents(limit=3, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
-    return get_most_recents(limit, page)
+  next_button = set_next_button(count, page + 1, nb_max_by_pages)
+  output = pdfs, end_time - start_time, next_button
+  return output
+
+def get_recents(limit=5, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
+  return get_most_recents(limit, page)
+
+def set_next_button(count, page, limit):
+  if count > page * limit:
+    return page
+  return 0

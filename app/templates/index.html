@@ -5,7 +5,7 @@
 {% block main %}
   {% if user_request%}
     <h2>
-      Results for :
+      Results for:
       <span class="words-results">{{ user_request }}</span> 
     </h2>
   {% endif %}
@@ -55,11 +55,21 @@
     TODO : add a next button here if there are other results...
     -->
 
-    {% if next_button > 0 %}
-      <a href="/search?s={{ user_request }}&p={{ next_button }}" class="next-page">
-      Next page >
+    <div style="width:100%;display:flex;flex-flow: row nowrap;justify-content: space-between;">
+      
+      <a href="{{ route }}{{ next_button - 2 }}" class="next-page">
+        {% if next_button > 1 %}
+        < Prev page
+        {% endif %}
       </a>
-    {% endif %}
+
+      <a href="{{ route }}{{ next_button }}" class="next-page" style="justify-self: end;">
+        {% if next_button > 0 %}
+        Next page >
+        {% endif %}
+      </a>
+
+    </div>
     <br/><br/><br/>
     Results found in <strong>{{ speed }}</strong><small> seconds.</small>.
   {% endif %}

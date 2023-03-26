@@ -119,7 +119,6 @@ def count_pdf():
 def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
     nb_pdf = count_pdf()
     ws = "'" + "','".join(words) + "'"
-    # print(list(words))
 
     return get_pdfs_by_words(nb_pdf, ws, page)
 

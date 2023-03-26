@@ -21,6 +21,7 @@ body {
   font-family: sans-serif;
   position: relative;
   overflow-x: hidden;
+  overflow-y: scroll;
 
   background-color: var(--bg-color);
   color: var(--font-color);
@@ -112,9 +113,9 @@ main {
   width: min(90vw, 1600px);
   margin: 3em auto;
 
-  display: grid;
+  /* display: grid;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
 }
 
 footer {

@@ -35,7 +35,6 @@ def search_page():
     page  = request.args.get('p')
 
     if not query:
-        # return render_template('search.html', allow_upload=app.config['ALLOW_UPLOAD'], count_pdf=count_pdf())
         return redirect('/')
 
     try:
@@ -53,32 +52,16 @@ def search_page():
     
 
     #words = map(lemmatize, words)
-    
-    # print(words)
 
     if not words:
-        # return render_template('index.html')
         return redirect('/')
 
-    rows, speed, next_button = get_results(words, page)
+    result = get_results(words, page)
+    rows, speed, next_button = result
+    rows = result[0]
 
-    if next_button:
-        next_button = page + 1
-
-    # if app.config['ALLOW_DELETE']:
-    #     return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
-
-    # if session['user']:
-    # user = json.loads(session['user'])
-    user = session['user']
-    return render_template('index.html', title='Search', user_request=query, rows=rows, speed=speed, next_button=next_button, user=user)
-    # return render_template('index.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
-
-# @app.route('/upload', methods=['GET'])
-# def upload_page():
-#     if not app.config['ALLOW_UPLOAD']:
-#         return render_template('index.html')
-#     return render_template('upload.html')
+    route = '/search?s=' + '+'.join(query.split(' ')) + '&p='
+    return render_template('index.html', title='Search', user_request=query, user=session.get('user'), rows=rows, speed=speed, next_button=next_button, favorites=get_user_favorites(session.get('userid')), route=route)
 
 @app.route('/upload', methods=['POST'])
 def uploaded_page():
@@ -232,9 +215,9 @@ def check_auth():
     AUTH_PATHS = ['/login', '/callback', '/register', '/logout']
     if request.path.startswith('/static/styles') or request.path == '/favicon.ico':
         return
+    print("{} {}".format(request.method, request.path))
     if request.path.startswith('/admin') and session.get('user').get('user_type') != 'ADMIN':
         return redirect('/')
-    print("{} {}".format(request.method, request.path))
     if request.path in AUTH_PATHS:
         return
     if not session or not session.get('user'):
@@ -251,8 +234,15 @@ def check_auth():
 # page routes
 @app.route('/', methods=['GET'])
 def index():
-    rows, speed, next_button = get_recents()
-    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, user=session.get('user'), favorites=session.get('favorites'))
+    page = request.args.get('p')
+
+    try:
+        page = abs(int(page))
+    except:
+        page = 0
+
+    rows, speed, next_button = get_recents(page=page)
+    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, user=session.get('user'), favorites=session.get('favorites'), route='/?p=')
 
 @app.route('/history', methods=['GET'])
 def history_page():
@@ -266,7 +256,6 @@ def favorites_page():
     
 @app.route('/upload', methods=['GET'])
 def upload_page():
-    # if not app.config['ALLOW_UPLOAD']:
     if get_upload_permission(get_userid_by_email(session.get('user').get('email'))):
         return render_template('upload.html', title='Upload', user=session.get('user'))
     return redirect('/')
