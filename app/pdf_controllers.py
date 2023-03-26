@@ -66,36 +66,41 @@ def get_most_recents(limit=3, page=0):
 
   return pdfs, end_time - start_time, next_button #pdfs list, time took to process and False for telling to not display a "next button"
 
-def get_pdfs_by_ids(pdfid_list,limit=8,page=0):
+def get_pdfs_by_ids(pdfid_list,limit=5,page=0):
   pdfs = []
   start_time = time()
-  if len(pdfid_list):
-    pdfid_list.reverse()
-    for pdfid in pdfid_list:
-      sql = """
-          SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
-          FROM PDF
-          WHERE ID = ({})
-      """.format(
-          pdfid
-      )
-      data = db_execute(sql)
 
-      for row in data:
-        pdfs.append({
-            "id"        : row[0],
-            "pdf_name"  : row[1],
-            "date"      : format(datetime.fromtimestamp(row[2]), '%d/%m/%Y'),
-            "title"     : row[3],
-            "authors"   : row[4],
-            "year"      : row[5],
-            "month"     : row[6],
-            "abstract"  : row[7]
-        })  
+  if len(pdfid_list):
+    pdfid_page = [pdfid_list[i * limit:(i + 1) * limit] for i in range((len(pdfid_list) + limit - 1) // limit )][page]
+
+    if len(pdfid_page):
+      for pdfid in pdfid_page:
+        sql = """
+            SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
+            FROM PDF
+            WHERE ID = ({})
+        """.format(
+            pdfid
+        )
+        data = db_execute(sql)
+
+        for row in data:
+          pdfs.append({
+              "id"        : row[0],
+              "pdf_name"  : row[1],
+              "date"      : format(datetime.fromtimestamp(row[2]), '%d/%m/%Y'),
+              "title"     : row[3],
+              "authors"   : row[4],
+              "year"      : row[5],
+              "month"     : row[6],
+              "abstract"  : row[7]
+          })  
       
   end_time = time()
 
-  return pdfs, end_time - start_time, False
+  next_button = set_next_button(len(pdfid_list), page+1, limit)
+
+  return pdfs, end_time - start_time, next_button
 
 def get_pdfid_by_name(name):
   sql = "SELECT ID FROM PDF WHERE NAME = '{}'".format(name)
@@ -149,7 +154,6 @@ def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
 
   sql = "SELECT COUNT(*) FROM FREQ WHERE WORD IN ({})".format(ws)
   count = db_execute(sql)[0][0]
-  print(count)
 
   next_button = set_next_button(count, page + 1, nb_max_by_pages)
   output = pdfs, end_time - start_time, next_button

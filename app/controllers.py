@@ -177,13 +177,13 @@ def get_word_cout(txt):
 
 
 
-def get_history(userid):
+def get_history(userid, page):
     view_history = get_view_history(userid)
-    return get_pdfs_by_ids(view_history)
+    return get_pdfs_by_ids(view_history, page=page)
 
-def get_favorites(userid):
+def get_favorites(userid, page):
     favorites = get_user_favorites(userid)
-    return get_pdfs_by_ids(favorites)
+    return get_pdfs_by_ids(favorites, page=page)
     
 
 def add_pdf_to_view_history(pdf_name, userid):
@@ -191,7 +191,7 @@ def add_pdf_to_view_history(pdf_name, userid):
     view_history = get_view_history(userid)
     if pdfid in view_history:
         view_history.remove(pdfid)
-    view_history.append(pdfid)
+    view_history.insert(0, pdfid)
     update_view_history(userid=userid, view_history=view_history)
     return
 
@@ -200,7 +200,7 @@ def toggle_pdf_favorite(pdfid, userid):
     if pdfid in favorites:
         favorites.remove(pdfid)
     else: 
-        favorites.append(pdfid)
+        favorites.insert(0, pdfid)
     update_user_favorites(userid=userid, favorites=favorites)
     favorites =  get_user_favorites(userid)
     return favorites

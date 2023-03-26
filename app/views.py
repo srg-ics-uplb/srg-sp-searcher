@@ -61,7 +61,7 @@ def search_page():
     rows = result[0]
 
     route = '/search?s=' + '+'.join(query.split(' ')) + '&p='
-    return render_template('index.html', title='Search', user_request=query, user=session.get('user'), rows=rows, speed=speed, next_button=next_button, favorites=get_user_favorites(session.get('userid')), route=route)
+    return render_template('index.html', title='Search', user_request=query, user=session.get('user'), rows=rows, speed=speed, next_button=next_button, prev_button=page-1, favorites=get_user_favorites(session.get('userid')), route=route)
 
 @app.route('/upload', methods=['POST'])
 def uploaded_page():
@@ -242,17 +242,31 @@ def index():
         page = 0
 
     rows, speed, next_button = get_recents(page=page)
-    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, user=session.get('user'), favorites=session.get('favorites'), route='/?p=')
+    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/?p=')
 
 @app.route('/history', methods=['GET'])
 def history_page():
-    rows, speed, next_button = get_history(session.get('userid'))
-    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, user=session.get('user'), favorites=session.get('favorites'))
+    page = request.args.get('p')
+
+    try:
+        page = abs(int(page))
+    except:
+        page = 0
+        
+    rows, speed, next_button = get_history(session.get('userid'), page=page)
+    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/history?p=')
 
 @app.route('/favorites', methods=['GET'])
 def favorites_page():
-    rows, speed, next_button = get_favorites(session.get('userid'))
-    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, user=session.get('user'), favorites=session.get('favorites'))
+    page = request.args.get('p')
+
+    try:
+        page = abs(int(page))
+    except:
+        page = 0
+
+    rows, speed, next_button = get_favorites(session.get('userid'), page=page)
+    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/favorites?p=')
     
 @app.route('/upload', methods=['GET'])
 def upload_page():

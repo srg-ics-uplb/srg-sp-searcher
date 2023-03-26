@@ -57,8 +57,8 @@
 
     <div style="width:100%;display:flex;flex-flow: row nowrap;justify-content: space-between;">
       
-      <a href="{{ route }}{{ next_button - 2 }}" class="next-page">
-        {% if next_button > 1 %}
+      <a href="{{ route }}{{ prev_button }}" class="next-page">
+        {% if prev_button >= 0 %}
         < Prev page
         {% endif %}
       </a>
