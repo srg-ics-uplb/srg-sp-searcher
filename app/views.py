@@ -285,7 +285,6 @@ def register():
 @app.route('/api/user/saved-trs/<pdfid>', methods=['PUT'])
 def edit_favorites(pdfid):
     session['favorites'] = toggle_pdf_favorite(int(pdfid), session.get('userid'))
-    print(session.get('favorites'))
     return jsonify({ 'favorites' : session.get('favorites'), 'status' : 200 })
 
 @app.route('/api/pdf/<pdfid>', methods=['DELETE'])
