@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main %}
+  <form id="register-form" method="post" action="/register">
+    <div class="radio-container">
+      <input type="radio" id="student" name="user_type" value="student" checked>
+      <label for="student">I am a Student</label>
+      <br>
+      <input type="radio" id="faculty" name="user_type" value="faculty">
+      <label for="faculty">I am Faculty Member</label>
+    </div>
+
+    <div>
+      <label for="campus">Campus:</label>
+      <select name="campus" id="campus" required>
+        <option value="UPLB">University of the Philippines Los Ba&#241;os</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="college">College:</label>
+      <select name="college" id="college" required>
+        <option value="CAS" selected>College of Arts and Sciences</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="department">Institute / Department:</label>
+      <select name="department" id="department" required>
+        <option value="ICS" selected>Institute of Computer Science</option>
+      </select>
+    </div>
+
+    <input type="submit" value="Complete Sign Up" />
+  </form>
+{% endblock %}

@@ -1,48 +1,46 @@
-<html>
-<head>
-  <title>Upload</title>
-  <meta charset="UTF-8">
-  <meta name="robots" content="noindex">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/search.css') }}">
-</head>
-<body>
+{% extends 'base.html' %}
 
-<nav>
-  <a title="Search in database" class="upload-link" href="/search">+ Search</a>
-</nav>
+{% block title %}Upload{% endblock %} 
 
+{% block main %}
+<div class="upload">
+  <form enctype="multipart/form-data">
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" required minlength="4" maxlength="200" size="55" placeholder="Title">
 
-<form enctype="multipart/form-data">
-  <table>
-  <tr><td><input type="text" id="title" name="title" required minlength="4" maxlength="200" size="55" placeholder="Title"></td></tr>
-  <tr><td><input type="text" id="authors" name="authors" required minlength="4" maxlength="200" size="55" placeholder="Authors (comma seperated)"></td></tr>
-  <tr><td><input type="number" id="year" name="year" required minlength="4" maxlength="200" size="55" placeholder="Publication Year"></td></tr>
-  <tr><td>
-     <select id="month" name="month" required >
-     <option value="None">Select Publication Month</option>
-     <option value="January">January</option>
-     <option value="February">February</option>
-     <option value="March">March</option>
-     <option value="April">April</option>
-     <option value="May">May</option>
-     <option value="June">June</option>
-     <option value="July">July</option>
-     <option value="August">August</option>
-     <option value="September">September</option>
-     <option value="October">October</option>
-     <option value="November">November</option>
-     <option value="December">December</option>
-     </select>
-  </td></tr>
-  <tr><td><input type="file" id="file" accept="application/pdf" name="file" multiple></td></tr>
-  <tr><td align="center"><input type="submit" class="search" value="Upload" formmethod="post" formaction=""></td></tr>
-  </table>
-</form>
+    <label for="authors">Authors:</label>
+    <input type="text" id="authors" name="authors" required minlength="4" maxlength="200" size="55" placeholder="Authors (comma seperated)">
 
-<footer class="footer-info">
-   &#169; 2021 <a href="https://github.com/srg-ics-uplb/srg-tr-searcher">SRG-ICS-UPLB</a>
-</footer>
-</body>
-</html>
+    <label for="abstract">Abstract:</label>
+    <textarea type="text" id="abstract" name="abstract" required minlength="4" size="55" placeholder="Abstract"></textarea>
 
+    <label for="index_terms">Index Terms:</label>
+    <input type="text" id="index_terms" name="index_terms" required minlength="4" maxlength="200" size="55" placeholder="Index Terms (comma seperated)">
+
+    <label for="year">Publication Year:</label>
+    <input type="number" id="year" name="year" required minlength="4" maxlength="200" size="55" placeholder="Publication Year">
+
+    <label for="month">Month:</label>
+    <select id="month" name="month" required >
+      <option value="" selected hidden>Select Publication Month</option>
+      <option value="January">January</option>
+      <option value="February">February</option>
+      <option value="March">March</option>
+      <option value="April">April</option>
+      <option value="May">May</option>
+      <option value="June">June</option>
+      <option value="July">July</option>
+      <option value="August">August</option>
+      <option value="September">September</option>
+      <option value="October">October</option>
+      <option value="November">November</option>
+      <option value="December">December</option>
+    </select>
+
+    <label for="file">Upload PDF</label>
+    <input type="file" id="file" accept="application/pdf" name="file" multiple>
+    
+    <input type="submit" class="search" value="Upload" formmethod="post" formaction="">
+  </form>
+</div>
+{% endblock %}

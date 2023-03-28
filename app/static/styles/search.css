@@ -2,16 +2,6 @@
   box-sizing: border-box;
 }
 
-footer.footer-info {
-  text-align: center;
-  bottom: 5px;
-  position: absolute;
-  width: 100%;
-  text-transform: uppercase;
-  font-size: 13px;
-  color: black;
-}
-
 html {
   -webkit-transition: opacity .5s;
   transition: opacity .5s;
@@ -32,25 +22,25 @@ body {
   font-family: 'Helvetica', Arial, sans-serif;
 }
 
-a, .a {
+main a, main .a {
   color: #168dff;
   text-decoration: none;
 }
 
-a:hover, .a:hover {
+main a:hover, main .a:hover {
   text-decoration: underline;
 }
 
-a:visited, .a:visited {
+main a:visited, main .a:visited {
   color: #706778;
 }
 
-.upload-link {
+main .upload-link {
   padding: 5px;
   float:right;
 }
 
-form {
+/* main form {
   position: absolute;
   top: 0;
   right: 0;
@@ -72,7 +62,11 @@ form {
           transform: translateZ(0);
 }
 
-form input[type="text"], form input[type="file"], input[type="number"], select {
+main form textarea,
+main form input[type="text"], 
+main form input[type="file"], 
+main input[type="number"], 
+main select {
   -webkit-box-flex: 1;
   -webkit-flex: 1;
       -ms-flex: 1;
@@ -87,15 +81,16 @@ form input[type="text"], form input[type="file"], input[type="number"], select {
   transition: background-color .2s ease-out;
 }
 
-form input[type="file"] {
+main form input[type="file"] {
   padding: 10.5px;
 }
 
-form input[type="text"]:focus, form input[type="file"] {
+main form input[type="text"]:focus, 
+main form input[type="file"] {
   background-color: #fefbf3;
 }
 
-form .search {
+main form .search {
   padding: 12px 24px;
   font-size: 16px;
   text-align: center;
@@ -109,7 +104,48 @@ form .search {
   transition: background-color .2s;
 }
 
-form .search:hover {
+main form .search:hover {
   background-color: #564f5d;
 }
+ */
 
+.upload {
+  width: min(600px, 100%);
+  margin: 0 auto;
+}
+
+.upload form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: .5em;
+}
+
+.upload form label {
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+.upload form input,
+.upload form textarea,
+.upload form select {
+  font-size: 1.2em;
+  padding: .5em 1em;
+  margin-bottom: 1em;
+  /* border-radius: .5em; */
+}
+
+.upload form textarea {
+  font-family: sans-serif;
+  resize: none;
+  height: 5em;
+}
+
+.upload form input[type='submit'] {
+  cursor: pointer;
+  width: max-content;
+  margin: 0 auto;
+  background-color: green;
+  color: white;
+  font-weight: 700;
+  border: none;
+}

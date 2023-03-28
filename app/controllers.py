@@ -21,6 +21,9 @@ from email.generator import Generator
 import traceback
 import sys
 
+from . user_controllers import *
+from . pdf_controllers import *
+
 
 from nltk import PorterStemmer
 
@@ -46,12 +49,12 @@ def pdf_allready_exists(pdf_name):
     conn.close()
     return False
 
-def insert_pdf_to_db(pdf_name,title,authors,year,month):
+def insert_pdf_to_db(pdf_name,title,authors,year,month,abstract,index_terms,userid):
     # insert a pdf into the database and return his id
     path = app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'] + pdf_name
     conn = conn_to_db('pdf.db')
-    cursor = conn.execute("INSERT INTO PDF (NAME, HASH, DATE, TITLE, AUTHORS, YEAR, MONTH ) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
-                                            pdf_name, hash_file(path), int(time()), title, authors, year, month))
+    cursor = conn.execute("INSERT INTO PDF (NAME, HASH, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT, INDEX_TERMS, UPLOADED_BY) VALUES ('{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}', '{}')".format(
+                                            pdf_name, hash_file(path), int(time()), title, authors, year, month, abstract, index_terms, userid))
     conn.commit()
     pdf_id = cursor.lastrowid
     conn.close()
@@ -116,60 +119,8 @@ def count_pdf():
 def get_results(words, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
     nb_pdf = count_pdf()
     ws = "'" + "','".join(words) + "'"
-    print(list(words))
 
-    conn = conn_to_db('pdf.db')
-
-    start_time = time()
-    # a pdf_score is calculated  with sum(tf-idf) of words matched time the number of different words matched on the pdf
-    cursor = conn.execute("""
-        SELECT PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH
-        FROM (SELECT PDF_ID, WORD, W_FREQ
-              FROM FREQ
-              WHERE WORD IN ({}))
-          INNER JOIN
-             (SELECT PDF_ID AS P2, WORD AS W2, {} / COUNT(PDF_ID) AS TIDF
-              FROM FREQ WHERE W2 IN ({})
-              GROUP BY W2) ON WORD = W2
-          INNER JOIN
-             (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH
-              FROM PDF) ON ID = PDF_ID
-        GROUP BY PDF_ID
-        ORDER BY SCORE DESC
-        LIMIT {} OFFSET {}
-      """.format(ws, str(float(nb_pdf)), ws, nb_max_by_pages, nb_max_by_pages * page))
-    conn.commit()
-    end_time = time()    
-
-    pdfs = []
-    for i, row in enumerate(cursor):
-        pdfs.append({"pdf_name" : row[1],
-                     "date"     : format(datetime.fromtimestamp(row[2]), '%d/%m/%Y'),
-                     "score"    : row[4] * 100,
-                     "title"     : row[5],
-                     "authors"  : row[6],
-                     "year"     : row[7],
-                     "month"    : row[8]})
-    conn.close()
-
-    if len(pdfs) == nb_max_by_pages:
-        return pdfs, end_time - start_time, True #pdfs list, time took to process and True for telling to display a "next button"
-
-    conn = conn_to_db('pdf.db')
-    cursor = conn.execute("SELECT NAME, DATE, TITLE, AUTHORS, YEAR, MONTH FROM PDF ORDER BY RANDOM() LIMIT {}".format(str(nb_min_pdfs - len(pdfs))))
-    conn.commit()
-
-    for row in cursor:
-        pdfs.append({   "pdf_name"  : row[0], 
-                        "date"      : format(datetime.fromtimestamp(row[1]), '%d/%m/%Y'),
-                        "title"     : row[2],
-                        "authors"   : row[3],
-                        "year"      : row[4],
-                        "month"     : row[5],  
-                        "score" : 0})
-
-    conn.close()
-    return pdfs, end_time - start_time, False #pdfs list, time took to process and False for telling to not display a "next button"
+    return get_pdfs_by_words(nb_pdf, ws, page)
 
 def hash_file(path):
     # return the md5 hash of a file
@@ -221,3 +172,35 @@ def get_word_cout(txt):
     word_count = Counter(words)
     return word_count 
 
+
+
+
+
+
+def get_history(userid, page):
+    view_history = get_view_history(userid)
+    return get_pdfs_by_ids(view_history, page=page)
+
+def get_favorites(userid, page):
+    favorites = get_user_favorites(userid)
+    return get_pdfs_by_ids(favorites, page=page)
+    
+
+def add_pdf_to_view_history(pdf_name, userid):
+    pdfid = get_pdfid_by_name(name=pdf_name)
+    view_history = get_view_history(userid)
+    if pdfid in view_history:
+        view_history.remove(pdfid)
+    view_history.insert(0, pdfid)
+    update_view_history(userid=userid, view_history=view_history)
+    return
+
+def toggle_pdf_favorite(pdfid, userid):
+    favorites = get_user_favorites(userid)
+    if pdfid in favorites:
+        favorites.remove(pdfid)
+    else: 
+        favorites.insert(0, pdfid)
+    update_user_favorites(userid=userid, favorites=favorites)
+    favorites =  get_user_favorites(userid)
+    return favorites
