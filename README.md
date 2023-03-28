@@ -25,13 +25,13 @@ In Ubuntu 20.04: `sudo apt install python3-pip sqlite3`
 5. `mkdir app/static/pdf`
 6. `./reset.sh`
 
-## Populate
+<!-- ## Populate
 1. Set the username and password in `app/creds.py`
 2. Enable upload by setting `app.config['ALLOW_UPLOAD'] = True` in `app/__init__.py`
 3. `gunicorn -c gunicorn_config.py app:app`
 4. Open `http://127.0.0.1:5000` in browser
 5. Check `access.log` and `error.log` files 
-6. Add contents through the upload link
+6. Add contents through the upload link -->
 
 ## Deploy
 Docker is the best way to deploy the app. This assumes that the remote docker 

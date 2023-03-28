@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main %}
+  {% if user_request%}
+    <h2>
+      Results for:
+      <span class="words-results">{{ user_request }}</span> 
+    </h2>
+  {% endif %}
+
+  {% if not rows %}
+    <h1>No results found.</h1>
+  {% else %}
+    <div class="words-results">
+    {% for row in rows %}
+    <div class="result" id="{{ row['id'] }}">
+      <div>
+        <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
+          {{ row["title"] }}
+        </a>
+      </div>
+
+      <div class="result__url">
+        <strong>{{ row["authors"] }}</strong>
+      </div>
+
+      <div>
+        <p style="font-size: 1.2em">{{ row["abstract"] }}</p>
+      </div>
+
+      <div class="result__description">
+
+        <a class="favorite-link"></a>
+        |
+        {% if user.get('allow_delete') == 1 %}
+        <a class="delete-link">Delete</a>
+        |
+        {% endif %}
+        Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
+
+      </div>
+
+    {% if allow_delete %}
+      <div class="result__url">
+      <strong><a href="/delete/{{ row['pdf_name'] }}">DELETE</a></strong>
+      </div>
+    {% endif %}
+    </div>
+    {% endfor %}
+    </div>
+
+    <!--
+    TODO : add a next button here if there are other results...
+    -->
+
+    <div style="width:100%;display:flex;flex-flow: row nowrap;justify-content: space-between;">
+      
+      <a href="{{ route }}{{ prev_button }}" class="next-page">
+        {% if prev_button >= 0 %}
+        < Prev page
+        {% endif %}
+      </a>
+
+      <a href="{{ route }}{{ next_button }}" class="next-page" style="justify-self: end;">
+        {% if next_button > 0 %}
+        Next page >
+        {% endif %}
+      </a>
+
+    </div>
+    <br/><br/><br/>
+    Results found in <strong>{{ speed }}</strong><small> seconds.</small>.
+  {% endif %}
+
+  <script>
+    let favorites = {{ favorites|tojson|safe }};
+
+    updateFavoriteLinks();
+
+    document.querySelectorAll('.favorite-link').forEach( elem => {
+      elem.addEventListener('click', ev => {
+        ev.preventDefault();
+        fetch(
+          'http://localhost:5000/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
+          { method: 'PUT'}
+        )
+          .then( response => response.json())
+          .then( data => {
+            favorites = data.favorites;
+            updateFavoriteLink(elem);
+          })
+          .catch( err =>{
+            console.log(err);
+          })
+      })
+    })
+
+    document.querySelectorAll('.delete-link').forEach( elem => {
+      elem.addEventListener('click', ev => {
+        ev.preventDefault();
+        document.getElementById(ev.target.parentElement.parentElement.id).classList.add('hidden');
+        fetch(
+          'http://localhost:5000/api/pdf/' + ev.target.parentElement.parentElement.id, 
+          { method: 'DELETE' }
+        )
+          .then( response => response.json())
+          .then( data => {
+            console.log(data)
+            alert('Successfully deleted pdf from database.')
+          })
+          .catch( err => {
+            alert('User does not have delete privileges.');
+            document.getElementById(ev.target.parentElement.parentElement.id).classList.remove('hidden');
+          })
+      })
+    })
+
+    function updateFavoriteLinks() {
+      document.querySelectorAll('.favorite-link').forEach( elem => {
+        updateFavoriteLink(elem)
+      })
+    }
+
+    function updateFavoriteLink(elem) {
+      elem.textContent = favorites.includes(parseInt(elem.parentElement.parentElement.id))
+                      ? 'Remove from favorites'
+                      : 'Add to favorites';
+    }
+  </script>
+{% endblock %}

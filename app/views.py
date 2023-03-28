@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, abort, session, send_from_directory, send_file
+from flask import Flask, render_template, request, redirect, url_for, abort, session, send_from_directory, send_file, make_response, jsonify
 from werkzeug.utils import secure_filename
 from app import app
 from time import time
@@ -10,52 +10,32 @@ import qrcode
 import fitz
 import tempfile
 import pytz
+# import requests
 
 from . controllers import *
-
-from flask_httpauth import HTTPBasicAuth
-from werkzeug.security import generate_password_hash, check_password_hash
+from . user_controllers import *
+from . oauth import *
+import json
 
 import io
 import random
 import unicodedata
 
+# @app.route('/static/pdf/<path:filename>')
+# def protected(filename):
+#     pdf_file=os.path.join(app.root_path,'static',app.config['PDF_DIR'])
+#     #pdf_file=os.path.join(app.instance_path,'static',app.config['PDF_DIR'])
 
-auth = HTTPBasicAuth()
+#     print(pdf_file,filename)
+#     return send_from_directory(pdf_file,filename)
 
-@auth.verify_password
-def verify_password(username, password):
-    if username in users:
-        return check_password_hash(users.get(username), password)
-    return False
-
-user = app.config["USERNAME"]
-pw = app.config["PASSWORD"]
-
-users = {
-    user: generate_password_hash(pw)
-}
-
-
-@app.route('/static/pdf/<path:filename>')
-@auth.login_required
-def protected(filename):
-    pdf_file=os.path.join(app.root_path,'static',app.config['PDF_DIR'])
-    #pdf_file=os.path.join(app.instance_path,'static',app.config['PDF_DIR'])
-
-    print(pdf_file,filename)
-    return send_from_directory(pdf_file,filename)
-
-
-@app.route('/', methods=['GET'])
 @app.route('/search', methods=['GET'])
-#@auth.login_required
 def search_page():
     query = request.args.get('s')
     page  = request.args.get('p')
 
     if not query:
-        return render_template('search.html', allow_upload=app.config['ALLOW_UPLOAD'], count_pdf=count_pdf())
+        return redirect('/')
 
     try:
         page = abs(int(page))
@@ -72,31 +52,18 @@ def search_page():
     
 
     #words = map(lemmatize, words)
-    
-    print(words)
 
     if not words:
-        return render_template('search.html')
+        return redirect('/')
 
-    rows, speed, next_button = get_results(words, page)
+    result = get_results(words, page)
+    rows, speed, next_button = result
+    rows = result[0]
 
-    if next_button:
-        next_button = page + 1
-
-    if app.config['ALLOW_DELETE']:
-        return render_template('results.html', user_request=query, rows=rows, speed=speed, next_button=next_button, allow_delete=True)
-
-    return render_template('results.html', user_request=query, rows=rows, speed=speed, next_button=next_button)
-
-@app.route('/upload', methods=['GET'])
-@auth.login_required
-def upload_page():
-    if not app.config['ALLOW_UPLOAD']:
-        return render_template('search.html')
-    return render_template('upload.html')
+    route = '/search?s=' + '+'.join(query.split(' ')) + '&p='
+    return render_template('index.html', title='Search', user_request=query, user=session.get('user'), rows=rows, speed=speed, next_button=next_button, prev_button=page-1, favorites=get_user_favorites(session.get('userid')), route=route)
 
 @app.route('/upload', methods=['POST'])
-@auth.login_required
 def uploaded_page():
     if not app.config['ALLOW_UPLOAD']:
         return render_template('search.html')
@@ -110,6 +77,9 @@ def uploaded_page():
         authors = request.form['authors']
         year = request.form['year']
         month = request.form['month']
+        abstract = request.form['abstract']
+        index_terms = request.form['index_terms']
+        userid = session.get('userid')
 
         uploaded_file = request.files['file']
         file_name = uploaded_file.filename
@@ -135,7 +105,12 @@ def uploaded_page():
             #adding the file name to the text for searching by file name...
             #norm_filnam = normalize_txt(file_name.replace('_', ' ').replace('.', ' ').replace('-', ' '))
             #txt = read_as_txt(pdf_path) + " " + norm_filnam
-            txt = read_as_txt(pdf_path) + " " + title + " " + authors + " " + year + " " + month
+            # txt = read_as_txt(pdf_path) + " " + title + " " + authors + " " + year + " " + month
+            txt = abstract + " " + index_terms + " " + title + " " + authors + " " + year + " " + month
+            txt_arr = txt.split(' ')
+            txt = ""
+            for word in txt_arr:
+                txt = txt + " " + word.strip(',.')
 
             if not txt:
                 remove(pdf_path)
@@ -148,38 +123,38 @@ def uploaded_page():
             print(traceback.format_exc())
             return "This is not a pdf... <a href='/search'>search</a>." 
 
-        pdf_id = insert_pdf_to_db(file_name,title,authors,year,month) #add the pdf to the database 
+        pdfid = insert_pdf_to_db(file_name,title,authors,year,month,abstract,index_terms,userid) #add the pdf to the database 
         total_words = sum(counter.values())
         for word in counter: #update the words in database
-            insert_word_to_db(pdf_id, word, counter[word] / float(total_words))
-        return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdf_id))
+            insert_word_to_db(pdfid, word, counter[word] / float(total_words))
+        return redirect('/')
+        # return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdfid))
     except:
+        abort(408)
         return "Fail to uploadi."
 
 
-@app.route('/delete/<pdf_name>')
-@auth.login_required
-def del_pdf(pdf_name):
-    if not app.config['ALLOW_DELETE']:
-        return "Delete is disabled. Back to <a href='/search'>search</a>." 
+# @app.route('/delete/<pdf_name>')
+# def del_pdf(pdf_name):
+#     if not app.config['ALLOW_DELETE']:
+#         return "Delete is disabled. Back to <a href='/search'>search</a>." 
 
-    pdf_id=delete_from_db(pdf_name)
-    #get the path to the target pdf
-    input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
-    os.remove(input_file)
-    return pdf_name+" has been deleted. Back to <a href='/search'>search</a>."
+#     pdfid=delete_from_db(pdf_name)
+#     #get the path to the target pdf
+#     input_file = os.path.join(app.root_path,'static',app.config['PDF_DIR']) + secure_filename(pdf_name)
+#     os.remove(input_file)
+#     return pdf_name+" has been deleted. Back to <a href='/search'>search</a>."
 
 
 @app.route('/bibtex/<pdf_name>')
-#@auth.login_required
 def bibtex(pdf_name):
     return generate_bibtex(pdf_name)
 
 
 @app.route('/pdf/<pdf_name>')
-@auth.login_required
 def return_pdf(pdf_name):
     try:
+        add_pdf_to_view_history(pdf_name, session['userid'])
         #get current date and time in PH
         datetime_ph = datetime.now(pytz.timezone('Asia/Manila'))
         download_date=datetime_ph.strftime("%Y-%m-%d %H:%M:%S %Z %z" )        
@@ -190,7 +165,7 @@ def return_pdf(pdf_name):
             version=1,
             box_size=2,
             border=5)
-        qr.add_data(input_data)
+        qr.add_data(input_data) 
         qr.make(fit=True)
         img = qr.make_image(fill='black', back_color='white')
         qrcode_filename=make_temp_file("qrcode.png")
@@ -230,3 +205,163 @@ def make_temp_file(suffix):
         temp = tempfile.NamedTemporaryFile()
         return temp.name+"_"+suffix
 
+
+
+
+
+
+@app.before_request
+def check_auth():
+    AUTH_PATHS = ['/login', '/callback', '/register', '/logout']
+    if request.path.startswith('/static/styles') or request.path == '/favicon.ico':
+        return
+    print("{} {}".format(request.method, request.path))
+    if request.path.startswith('/admin') and session.get('user').get('user_type') != 'ADMIN':
+        return redirect('/')
+    if request.path in AUTH_PATHS:
+        return
+    if not session or not session.get('user'):
+        return redirect('/login')
+    session['user'] = get_user_by_id(session.get('userid'))
+    session['user']['name'] = session.get('user').get('given_name') + " " + session.get('user').get('family_name')
+    # user = session.get('user')
+    # if not user.get('campus') or not user.get('college') or not user.get('department'):
+    #     return redirect('/register')
+    return
+
+
+
+# page routes
+@app.route('/', methods=['GET'])
+def index():
+    page = request.args.get('p')
+
+    try:
+        page = abs(int(page))
+    except:
+        page = 0
+
+    rows, speed, next_button = get_recents(page=page)
+    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/?p=')
+
+@app.route('/history', methods=['GET'])
+def history_page():
+    page = request.args.get('p')
+
+    try:
+        page = abs(int(page))
+    except:
+        page = 0
+        
+    rows, speed, next_button = get_history(session.get('userid'), page=page)
+    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/history?p=')
+
+@app.route('/favorites', methods=['GET'])
+def favorites_page():
+    page = request.args.get('p')
+
+    try:
+        page = abs(int(page))
+    except:
+        page = 0
+
+    rows, speed, next_button = get_favorites(session.get('userid'), page=page)
+    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/favorites?p=')
+    
+@app.route('/upload', methods=['GET'])
+def upload_page():
+    if get_upload_permission(get_userid_by_email(session.get('user').get('email'))):
+        return render_template('upload.html', title='Upload', user=session.get('user'))
+    return redirect('/')
+
+@app.route('/register', methods=['GET'])
+def register():
+    return redirect('/')
+    return render_template('register.html', title='Signup', user=session['user'])
+
+
+
+# api routes
+@app.route('/api/user/saved-trs/<pdfid>', methods=['PUT'])
+def edit_favorites(pdfid):
+    session['favorites'] = toggle_pdf_favorite(int(pdfid), session.get('userid'))
+    return jsonify({ 'favorites' : session.get('favorites'), 'status' : 200 })
+
+@app.route('/api/pdf/<pdfid>', methods=['DELETE'])
+def delete_pdf_endpoint(pdfid):
+    if get_delete_permission(session.get('userid')):
+        pdf_name = get_pdf_name_by_id(pdfid)
+        # delete_from_db(pdf_name)
+        return jsonify({ 'status': 200, 'message': 'PDF {} successfully deleted from database.'.format(pdf_name)})
+    abort(403)
+
+@app.route('/register', methods=['POST'])
+def register_user():
+    user = { 
+        **(session.get('user')),
+        "campus"      : request.form.get('campus'),
+        "college"     : request.form.get('college'),
+        "department"  : request.form.get('department'),
+        "user_type"   : request.form.get('user_type')
+    }
+    upsert_user({**user, "userid": session.get('userid')})
+    session['user'] = user
+    session['favorites'] = get_user_favorites(session.get('userid'))
+    return redirect('/')
+
+@app.route('/api/user/<username>/delete-permit', methods=['PUT'])
+def toggle_delete_permission(username):
+    # check if current user has admin privileges
+    userid = get_userid_by_email(session.get('user').get('email'))
+
+    set_user = get_userid_by_email("{}@up.edu.ph".format(username))
+    allow_delete = set_delete_permission(set_user, not int(get_delete_permission(set_user)))
+
+    return jsonify({ 'status': 200, 'message': 'User delete permit changed.', 'deletePermit': allow_delete })
+
+@app.route('/api/user/<username>/upload-permit', methods=['PUT'])
+def toggle_upload_permission(username):
+    set_user = get_userid_by_email("{}@up.edu.ph".format(username))
+    allow_upload = set_upload_permission(set_user, not int(get_upload_permission(set_user)))
+
+    return jsonify({ 'status': 200, 'message': 'User upload permit changed.', 'uploadPermit': allow_upload })
+
+
+
+
+# auth routes
+@app.route('/login', methods=['GET'])
+def login():
+    res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
+    res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
+    res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
+    return res
+
+@app.route('/callback', methods=['POST', 'GET'])
+def callback():
+    credential = request.form.get('credential')
+    user_google_data = verify_token(credential)
+    if user_google_data:
+        user = upsert_user(user_google_data)
+        session['user'] = { **user, "name" : user.get('given_name') + " " + user.get('family_name') }
+        session['userid'] = user_google_data['userid']
+
+    return redirect('/')
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    session = None
+    return redirect('/login')
+
+
+
+# admin routes
+@app.route('/admin', methods=['GET'])
+def admin_page():
+    users = list_users()
+    new_users = []
+    for user in users:
+        new_user = { **user, 'username': user.get('email')[:-10] }
+        new_users.append(new_user)
+    
+    return render_template('admin.html', title="Admin", users = new_users, user=session.get('user'))
