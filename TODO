@@ -3,9 +3,13 @@
 * [x] Protect static directory with http basic auth
 * [x] Update Terms of Use and Privacy Policy
 * [x] Add QR code with URL and download date/time
-* [] Make the HTML templates mobile-friendly
-* [] Allow searching on title, authors, and year fields
 * [x] Generate downloadable bibtex entry in results page
-* [] Set up log rotation for access.log
 * [x] Create basic stats script
 * [x] Add delete option
+
+* [] Set up log rotation for access.log
+* [] Make the HTML templates mobile-friendly
+* [] Allow searching on title, authors, and year fields
+* [] Search filters
+* [] Edit research paper information
+* [] Upload approval process

@@ -83,7 +83,7 @@
       elem.addEventListener('click', ev => {
         ev.preventDefault();
         fetch(
-          'http://localhost:5000/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
+          '{{ baseURL }}/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
           { method: 'PUT'}
         )
           .then( response => response.json())
@@ -102,7 +102,7 @@
         ev.preventDefault();
         document.getElementById(ev.target.parentElement.parentElement.id).classList.add('hidden');
         fetch(
-          'http://localhost:5000/api/pdf/' + ev.target.parentElement.parentElement.id, 
+          '{{ baseURL }}/api/pdf/' + ev.target.parentElement.parentElement.id, 
           { method: 'DELETE' }
         )
           .then( response => response.json())

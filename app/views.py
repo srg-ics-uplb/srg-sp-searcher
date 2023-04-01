@@ -61,7 +61,7 @@ def search_page():
     rows = result[0]
 
     route = '/search?s=' + '+'.join(query.split(' ')) + '&p='
-    return render_template('index.html', title='Search', user_request=query, user=session.get('user'), rows=rows, speed=speed, next_button=next_button, prev_button=page-1, favorites=get_user_favorites(session.get('userid')), route=route)
+    return render_template('index.html', title='Search', user_request=query, user=session.get('user'), rows=rows, speed=speed, next_button=next_button, prev_button=page-1, favorites=get_user_favorites(session.get('userid')), route=route, baseURL = app.config['BASE_URL'])
 
 @app.route('/upload', methods=['POST'])
 def uploaded_page():
@@ -242,7 +242,7 @@ def index():
         page = 0
 
     rows, speed, next_button = get_recents(page=page)
-    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/?p=')
+    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/?p=', baseURL = app.config['BASE_URL'])
 
 @app.route('/history', methods=['GET'])
 def history_page():
@@ -254,7 +254,7 @@ def history_page():
         page = 0
         
     rows, speed, next_button = get_history(session.get('userid'), page=page)
-    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/history?p=')
+    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/history?p=', baseURL = app.config['BASE_URL'])
 
 @app.route('/favorites', methods=['GET'])
 def favorites_page():
@@ -266,7 +266,7 @@ def favorites_page():
         page = 0
 
     rows, speed, next_button = get_favorites(session.get('userid'), page=page)
-    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/favorites?p=')
+    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/favorites?p=', baseURL = app.config['BASE_URL'])
     
 @app.route('/upload', methods=['GET'])
 def upload_page():
@@ -282,7 +282,7 @@ def register():
 
 
 # api routes
-@app.route('/api/user/saved-trs/<pdfid>', methods=['PUT'])
+@app.route('/api/user/saved-trs/<pdfid>', methods=['PUT', 'OPTIONS'])
 def edit_favorites(pdfid):
     session['favorites'] = toggle_pdf_favorite(int(pdfid), session.get('userid'))
     return jsonify({ 'favorites' : session.get('favorites'), 'status' : 200 })
@@ -332,7 +332,7 @@ def toggle_upload_permission(username):
 # auth routes
 @app.route('/login', methods=['GET'])
 def login():
-    res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
+    res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = app.config['BASE_URL'] + '/callback'))
     res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
     res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
     return res
