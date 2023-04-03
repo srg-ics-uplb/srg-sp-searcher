@@ -166,3 +166,8 @@ def set_next_button(count, page, limit):
   if count > page * limit:
     return page
   return 0
+
+def get_title_by_name(pdf_name):
+  sql = "SELECT title FROM PDF WHERE name = '{}'".format(pdf_name)
+  data = db_execute(sql)[0]
+  return data[0]
