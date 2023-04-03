@@ -279,6 +279,11 @@ def register():
     return redirect('/')
     return render_template('register.html', title='Signup', user=session['user'])
 
+@app.route('/view_pdf/<pdf_name>')
+def view_pdf(pdf_name):
+    pdf_title = get_title_by_name(pdf_name)
+    return render_template('pdf.html', title=pdf_title, pdf_url= app.config['BASE_URL'] + '/pdf/' + pdf_name, user=session.get('user'))
+
 
 
 # api routes

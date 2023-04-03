@@ -6,10 +6,14 @@
 * [x] Generate downloadable bibtex entry in results page
 * [x] Create basic stats script
 * [x] Add delete option
+* [x] Disabled PDF download
 
 * [] Set up log rotation for access.log
 * [] Make the HTML templates mobile-friendly
 * [] Allow searching on title, authors, and year fields
 * [] Search filters
+* [] Create research paper page
 * [] Edit research paper information
 * [] Upload approval process
+* [] Delete Paper
+* [] UP Mail as watermark in PDF
