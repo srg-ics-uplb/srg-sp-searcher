@@ -32,28 +32,26 @@
 
       <div class="result__description">
 
-        <a class="favorite-link"></a>
-        |
-        {% if user.get('allow_delete') == 1 %}
-        <a class="delete-link">Delete</a>
-        |
+        {% if user %}
+          <a class="favorite-link"></a>
+          |
+          {% if user.get('allow_delete') == 1 %}
+          <a class="delete-link">Delete</a>
+          |
+          {% endif %}
         {% endif %}
         Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
 
       </div>
 
-    {% if allow_delete %}
+    <!-- {% if allow_delete %}
       <div class="result__url">
       <strong><a href="/delete/{{ row['pdf_name'] }}">DELETE</a></strong>
       </div>
-    {% endif %}
+    {% endif %} -->
     </div>
     {% endfor %}
     </div>
-
-    <!--
-    TODO : add a next button here if there are other results...
-    -->
 
     <div style="width:100%;display:flex;flex-flow: row nowrap;justify-content: space-between;">
       
@@ -74,59 +72,62 @@
     Results found in <strong>{{ speed }}</strong><small> seconds.</small>.
   {% endif %}
 
-  <script>
-    let favorites = {{ favorites|tojson|safe }};
+  {% if user %}
+    <script>
+      let favorites = {{ favorites|tojson|safe }};
 
-    updateFavoriteLinks();
+      updateFavoriteLinks();
 
-    document.querySelectorAll('.favorite-link').forEach( elem => {
-      elem.addEventListener('click', ev => {
-        ev.preventDefault();
-        fetch(
-          '{{ baseURL }}/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
-          { method: 'PUT'}
-        )
-          .then( response => response.json())
-          .then( data => {
-            favorites = data.favorites;
-            updateFavoriteLink(elem);
-          })
-          .catch( err =>{
-            console.log(err);
-          })
-      })
-    })
-
-    document.querySelectorAll('.delete-link').forEach( elem => {
-      elem.addEventListener('click', ev => {
-        ev.preventDefault();
-        document.getElementById(ev.target.parentElement.parentElement.id).classList.add('hidden');
-        fetch(
-          '{{ baseURL }}/api/pdf/' + ev.target.parentElement.parentElement.id, 
-          { method: 'DELETE' }
-        )
-          .then( response => response.json())
-          .then( data => {
-            console.log(data)
-            alert('Successfully deleted pdf from database.')
-          })
-          .catch( err => {
-            alert('User does not have delete privileges.');
-            document.getElementById(ev.target.parentElement.parentElement.id).classList.remove('hidden');
-          })
-      })
-    })
-
-    function updateFavoriteLinks() {
       document.querySelectorAll('.favorite-link').forEach( elem => {
-        updateFavoriteLink(elem)
+        elem.addEventListener('click', ev => {
+          ev.preventDefault();
+          fetch(
+            '{{ baseURL }}/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
+            { method: 'PUT'}
+          )
+            .then( response => response.json())
+            .then( data => {
+              favorites = data.favorites;
+              updateFavoriteLink(elem);
+            })
+            .catch( err =>{
+              console.log(err);
+            })
+        })
       })
-    }
 
-    function updateFavoriteLink(elem) {
-      elem.textContent = favorites.includes(parseInt(elem.parentElement.parentElement.id))
-                      ? 'Remove from favorites'
-                      : 'Add to favorites';
-    }
-  </script>
+      document.querySelectorAll('.delete-link').forEach( elem => {
+        elem.addEventListener('click', ev => {
+          ev.preventDefault();
+          document.getElementById(ev.target.parentElement.parentElement.id).classList.add('hidden');
+          fetch(
+            '{{ baseURL }}/api/pdf/' + ev.target.parentElement.parentElement.id, 
+            { method: 'DELETE' }
+          )
+            .then( response => response.json())
+            .then( data => {
+              console.log(data)
+              alert('Successfully deleted pdf from database.')
+            })
+            .catch( err => {
+              alert('User does not have delete privileges.');
+              document.getElementById(ev.target.parentElement.parentElement.id).classList.remove('hidden');
+            })
+        })
+      })
+
+      function updateFavoriteLinks() {
+        document.querySelectorAll('.favorite-link').forEach( elem => {
+          updateFavoriteLink(elem)
+        })
+      }
+
+      function updateFavoriteLink(elem) {
+        elem.textContent = favorites.includes(parseInt(elem.parentElement.parentElement.id))
+                        ? 'Remove from favorites'
+                        : 'Add to favorites';
+      }
+
+      </script>
+  {% endif %}
 {% endblock %}

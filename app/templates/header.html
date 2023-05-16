@@ -2,8 +2,8 @@
   <div>
     <a href="/"><h1>UPLB ICS Peak One</h1></a>
     <form action="/search" method="GET" >
-      <input type="text" id="s" name="s" placeholder="Maximum of 5 words" {% if not user %} disabled {% endif %} required>
-      <button type="submit" {% if not user %} disabled {% endif %} >Search</button>
+      <input type="text" id="s" name="s" placeholder="Maximum of 5 words" required>
+      <button type="submit" >Search</button>
     </form>
     {% if user %}
       <div id="profile">
