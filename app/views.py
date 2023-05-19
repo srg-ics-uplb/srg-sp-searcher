@@ -252,9 +252,6 @@ def list_page():
         route = request.path + '?p='
 
     if session.get('user'):
-        user = session.get('user')
-        favorites = session.get('favorites')
-
         return render_template(
             'index.html',
             title = title,
@@ -262,15 +259,12 @@ def list_page():
             speed = speed,
             next_button = next_button,
             prev_button = page-1,
-            user = user,
-            favorites = favorites,
+            user = session.get('user'),
+            favorites = session.get('favorites'),
             route = route,
             baseURL = app.config['BASE_URL']
         )
     else:
-        user = None
-        favorites = []
-        
         res = make_response(
             render_template(
                 'index.html',
@@ -279,8 +273,8 @@ def list_page():
                 speed = speed,
                 next_button = next_button,
                 prev_button = page-1,
-                user = user,
-                favorites = favorites,
+                user = None,
+                favorites = '[]',
                 route = route,
                 baseURL = app.config['BASE_URL'],
                 client_id = app.config['GOOGLE_CLIENT_ID'], 
