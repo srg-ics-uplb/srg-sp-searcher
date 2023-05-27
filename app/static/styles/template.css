@@ -109,6 +109,15 @@ header nav a:hover {
   color: var(--font-color);
 }
 
+header nav a > svg {
+  height: 1em;
+  fill: var(--bg-color);
+}
+
+header nav a:hover > svg {
+  fill: var(--font-color);
+}
+
 main {
   width: min(90vw, 1600px);
   margin: 3em auto;
@@ -214,4 +223,13 @@ main button {
   font-weight: bold;
   color: white;
   background-color: green;
+}
+
+.result a:hover {
+  text-decoration: underline;
+}
+
+main a > svg {
+  height: 1em;
+  pointer-events: none;
 }
