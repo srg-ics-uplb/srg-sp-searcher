@@ -1,8 +1,135 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ title }}{% endblock %}
+{% block style %}
+.main-div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1em;
+}
+.index-term-btn {
+  cursor: pointer;
+  padding: .5em .25em;
+}
+{% endblock %}
 
 {% block main %}
   <!-- <iframe src="{{ pdf_url }}#toolbar=0" width="100%" height="1000"></iframe> -->
-  <iframe src="{{ pdf_url }}" width="100%" height="1000"></iframe>
+  <div class="main-div">
+    <div id="info-div">
+      <div id="display-div">
+        <h1>{{ pdf.get('title') }}</h1>
+        <h2>{{ pdf.get('authors') }}</h2>
+        <p>Published {{ pdf.get('month') }} {{ pdf.get('year') }}</p>
+        <div>
+          {% if session['user'].get('user_type') == 'ADMIN' %}
+            <button id="edit-btn">Edit</button>
+          {% endif %}
+        </div>
+        <h4>Abstract:</h4>
+        <p>{{ pdf.get('abstract') }}</p>
+        {% for tag in pdf.get('index_terms') %}
+          <button class="index-term-btn"><strong>{{ tag }}</strong></button>
+        {% endfor %}
+      </div>
+
+      <!-- edit info form -->
+      <div id="form-div" class="hidden">
+        <button class="cancel-btn"><strong>< Cancel</strong></button>
+        <form id="edit-form">
+          <input id="id" name="id" required hidden value="{{ pdf.get('id') }}" />
+          <label for="title">Title:</label>
+          <input type="text" id="title" name="title" required minlength="4" maxlength="200" size="55" placeholder="Title" value="{{ pdf.get('title') }}">
+  
+          <label for="authors">Authors:</label>
+          <input type="text" id="authors" name="authors" required minlength="4" maxlength="200" size="55" placeholder="Authors (comma seperated)" value="{{ pdf.get('authors') }}">
+  
+          <label for="abstract">Abstract:</label>
+          <textarea type="text" id="abstract" name="abstract" required minlength="4" size="55" placeholder="Abstract">{{ pdf.get('abstract') }}</textarea>
+  
+          <label for="index_terms">Index Terms:</label>
+          <input type="text" id="index_terms" name="index_terms" required minlength="4" maxlength="200" size="55" placeholder="Index Terms (comma seperated)" value="{{ ', '.join(pdf.get('index_terms')) }}">
+  
+          <label for="year">Publication Year:</label>
+          <input type="number" id="year" name="year" required minlength="4" maxlength="200" size="55" placeholder="Publication Year" value="{{ pdf.get('year') }}">
+  
+          <label for="month">Month:</label>
+          <select id="month" name="month" required >
+            <option value="" hidden>Select Publication Month</option>
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+
+          <input type="submit" value="Submit" />
+          
+        </form>
+      </div>
+    </div>
+    <iframe src="{{ baseURL + '/pdf/' + pdf.get('name') }}" width="100%" height="1000"></iframe>
+  </div>
+
+  <script>
+
+    document.querySelectorAll(`.index-term-btn`).forEach( elem => {
+      console.log(elem)
+      elem.addEventListener('click', ev => {
+        ev.preventDefault();
+        search_term = elem.textContent.trim().split(' ').join('+')
+        location = `{{ baseURL }}/search?s=${search_term}`
+      })
+    })
+
+    document.querySelector(`#edit-btn`).addEventListener('click', ev => {
+      ev.preventDefault();
+      document.querySelector(`#form-div`).classList.remove('hidden');
+      document.querySelector(`#display-div`).classList.add('hidden');
+    })
+
+    document.querySelector(`.cancel-btn`).addEventListener('click', ev => {
+      ev.preventDefault()
+      document.querySelector(`#form-div`).classList.add('hidden');
+      document.querySelector(`#display-div`).classList.remove('hidden');
+    })
+
+    document.querySelector(`#month`).value = `{{ pdf.get('month') }}`;
+
+    document.querySelector(`#edit-form input[type='submit']`).addEventListener('click', ev => {
+      ev.preventDefault();
+      let data = {}
+      let formData = new FormData(document.querySelector(`#edit-form`))
+      for ( let pair of formData.entries()) {
+        data[pair[0]] = pair[1]
+      }
+
+      fetch(
+        `{{ baseURL }}/api/pdf/{{ pdf.get('id')}}`,
+        {
+          method: 'PUT',
+          body: JSON.stringify(data),
+          headers: {
+            'Content-Type': "application/json",
+          }
+        }
+      )
+        .then( response => response.json())
+        .then( data => {
+          console.log(data)
+        })
+        .catch( err => {
+          console.log(err)
+          alert("Failed to edit TR information.")
+        })
+        .finally(() => location.reload())
+    })
+  </script>
 {% endblock %}

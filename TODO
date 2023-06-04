@@ -8,6 +8,7 @@
 * [x] Add delete option
 * [x] Disabled PDF download
 
+* [] PRIO: Edit details of TR (pdf.html)
 * [] Set up log rotation for access.log
 * [] Make the HTML templates mobile-friendly
 * [] Allow searching on title, authors, and year fields
