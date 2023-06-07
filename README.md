@@ -67,9 +67,26 @@ host is configured for passwordless access.
 2. Download access log: `DOCKER_HOST="ssh://remote.docker.host" docker cp srg-tr-searcher:/usr/src/access.log access_for_stats.log`
 3. Get some stats: `./stats.sh`
 
-## Upgrade
+## Upgrading
 
 Do the install for the new version. If there are no changes in the db schema,
-copy the previous version `app/sql/users.db`, `app/sql/pdf.db`, and `app/static/pdf` to the new version
+copy the previous version's `app/sql/users.db`, `app/sql/pdf.db`, and `app/static/pdf` to the new version
+
+## Pull Requests
+Contributions can be done using pull requests to the dev branch.
+The pull request has to be reviewed and tested first. Each pull request 
+should address a maximum of 5 issues/features. 
+
+```
+git fetch pull/PRNUMBER/head:BRANCHNAME
+git checkout BRANCHNAME
+```
+
+Test the BRANCHNAME. Accept the pull request if everything is ok.
+
+
+
+
+
 
 
