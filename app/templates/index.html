@@ -17,7 +17,7 @@
     {% for row in rows %}
     <div class="result" id="{{ row['id'] }}">
       <div>
-        <a href="/pdf/{{ row['pdf_name'] }}" target="_blank" class="result__title">
+        <a href="/research_paper/{{ row['pdf_name'] }}" target="_blank" class="result__title">
           {{ row["title"] }}
         </a>
       </div>
@@ -32,28 +32,26 @@
 
       <div class="result__description">
 
-        <a class="favorite-link"></a>
-        |
-        {% if user.get('allow_delete') == 1 %}
-        <a class="delete-link">Delete</a>
-        |
+        {% if user %}
+          <a class="favorite-link"></a>
+          |
+          {% if user.get('allow_delete') == 1 %}
+          <strong><a class="delete-link">DELETE</a></strong>
+          |
+          {% endif %}
         {% endif %}
         Published on  {{ row["month"] }} {{row["year"]}}, Search Score: {{row["score"]}}, <a href="/bibtex/{{ row['pdf_name'] }}" target="_blank">[BibTeX]</a>
 
       </div>
 
-    {% if allow_delete %}
+    <!-- {% if allow_delete %}
       <div class="result__url">
       <strong><a href="/delete/{{ row['pdf_name'] }}">DELETE</a></strong>
       </div>
-    {% endif %}
+    {% endif %} -->
     </div>
     {% endfor %}
     </div>
-
-    <!--
-    TODO : add a next button here if there are other results...
-    -->
 
     <div style="width:100%;display:flex;flex-flow: row nowrap;justify-content: space-between;">
       
@@ -74,59 +72,63 @@
     Results found in <strong>{{ speed }}</strong><small> seconds.</small>.
   {% endif %}
 
-  <script>
-    let favorites = {{ favorites|tojson|safe }};
+  {% if user %}
+    <script>
+      let favorites = {{ favorites|tojson|safe }};
 
-    updateFavoriteLinks();
+      updateFavoriteLinks();
 
-    document.querySelectorAll('.favorite-link').forEach( elem => {
-      elem.addEventListener('click', ev => {
-        ev.preventDefault();
-        fetch(
-          'http://localhost:5000/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
-          { method: 'PUT'}
-        )
-          .then( response => response.json())
-          .then( data => {
-            favorites = data.favorites;
-            updateFavoriteLink(elem);
-          })
-          .catch( err =>{
-            console.log(err);
-          })
-      })
-    })
-
-    document.querySelectorAll('.delete-link').forEach( elem => {
-      elem.addEventListener('click', ev => {
-        ev.preventDefault();
-        document.getElementById(ev.target.parentElement.parentElement.id).classList.add('hidden');
-        fetch(
-          'http://localhost:5000/api/pdf/' + ev.target.parentElement.parentElement.id, 
-          { method: 'DELETE' }
-        )
-          .then( response => response.json())
-          .then( data => {
-            console.log(data)
-            alert('Successfully deleted pdf from database.')
-          })
-          .catch( err => {
-            alert('User does not have delete privileges.');
-            document.getElementById(ev.target.parentElement.parentElement.id).classList.remove('hidden');
-          })
-      })
-    })
-
-    function updateFavoriteLinks() {
       document.querySelectorAll('.favorite-link').forEach( elem => {
-        updateFavoriteLink(elem)
+        elem.addEventListener('click', ev => {
+          ev.preventDefault();
+          console.log(ev.target.parentElement.parentElement.id)
+          fetch(
+            '{{ baseURL }}/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
+            { method: 'PUT'}
+          )
+            .then( response => response.json())
+            .then( data => {
+              favorites = data.favorites;
+              updateFavoriteLink(elem);
+            })
+            .catch( err =>{
+              console.log(err);
+            })
+        })
       })
-    }
 
-    function updateFavoriteLink(elem) {
-      elem.textContent = favorites.includes(parseInt(elem.parentElement.parentElement.id))
-                      ? 'Remove from favorites'
-                      : 'Add to favorites';
-    }
-  </script>
+      document.querySelectorAll('.delete-link').forEach( elem => {
+        elem.addEventListener('click', ev => {
+          ev.preventDefault();
+          document.getElementById(ev.target.parentElement.parentElement.id).classList.add('hidden');
+          fetch(
+            '{{ baseURL }}/api/pdf/' + ev.target.parentElement.parentElement.id, 
+            { method: 'DELETE' }
+          )
+            .then( response => response.json())
+            .then( data => {
+              console.log(data)
+              alert('Successfully deleted pdf from database.')
+            })
+            .catch( err => {
+              alert('User does not have delete privileges.');
+              document.getElementById(ev.target.parentElement.parentElement.id).classList.remove('hidden');
+            })
+        })
+      })
+
+      function updateFavoriteLinks() {
+        document.querySelectorAll('.favorite-link').forEach( elem => {
+          updateFavoriteLink(elem)
+        })
+      }
+
+      function updateFavoriteLink(elem) {
+        elem.innerHTML = favorites.includes(parseInt(elem.parentElement.parentElement.id))
+                        ? `<svg fill='red' xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24"><path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917Z"/></svg> Remove from Favorites`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g id="_01_align_center" data-name="01 align center"><path d="M17.5.917a6.4,6.4,0,0,0-5.5,3.3A6.4,6.4,0,0,0,6.5.917,6.8,6.8,0,0,0,0,7.967c0,6.775,10.956,14.6,11.422,14.932l.578.409.578-.409C13.044,22.569,24,14.742,24,7.967A6.8,6.8,0,0,0,17.5.917ZM12,20.846c-3.253-2.43-10-8.4-10-12.879a4.8,4.8,0,0,1,4.5-5.05A4.8,4.8,0,0,1,11,7.967h2a4.8,4.8,0,0,1,4.5-5.05A4.8,4.8,0,0,1,22,7.967C22,12.448,15.253,18.416,12,20.846Z"/></g></svg> Add to Favorites`;
+      }
+
+      </script>
+  {% endif %}
 {% endblock %}

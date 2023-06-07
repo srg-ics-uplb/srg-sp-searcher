@@ -25,6 +25,25 @@ In Ubuntu 20.04: `sudo apt install python3-pip sqlite3`
 5. `mkdir app/static/pdf`
 6. `./reset.sh`
 
+Create a `client_secret.json` with the following variables needed for 
+Google authentication
+
+```
+{
+  "web":
+  {
+    "client_id": "xxx",
+    "project_id":"xxx",
+    "auth_uri":"xxx",
+    "token_uri":"xxx",
+    "auth_provider_x509_cert_url":"xxx",
+    "client_secret":"xxx",
+    "redirect_uris":["http://localhost:5000/callback"]
+  }
+}
+
+```
+
 <!-- ## Populate
 1. Set the username and password in `app/creds.py`
 2. Enable upload by setting `app.config['ALLOW_UPLOAD'] = True` in `app/__init__.py`
@@ -47,4 +66,27 @@ host is configured for passwordless access.
 1. Get a shell: `DOCKER_HOST="ssh://remote.docker.host" docker-compose exec flask bash`
 2. Download access log: `DOCKER_HOST="ssh://remote.docker.host" docker cp srg-tr-searcher:/usr/src/access.log access_for_stats.log`
 3. Get some stats: `./stats.sh`
+
+## Upgrading
+
+Do the install for the new version. If there are no changes in the db schema,
+copy the previous version's `app/sql/users.db`, `app/sql/pdf.db`, and `app/static/pdf` to the new version
+
+## Pull Requests
+Contributions can be done using pull requests to the dev branch.
+The pull request has to be reviewed and tested first. Each pull request 
+should address a maximum of 5 issues/features. 
+
+```
+git fetch pull/PRNUMBER/head:BRANCHNAME
+git checkout BRANCHNAME
+```
+
+Test the BRANCHNAME. Accept the pull request if everything is ok.
+
+
+
+
+
+
 

@@ -29,44 +29,10 @@ import unicodedata
 #     print(pdf_file,filename)
 #     return send_from_directory(pdf_file,filename)
 
-@app.route('/search', methods=['GET'])
-def search_page():
-    query = request.args.get('s')
-    page  = request.args.get('p')
-
-    if not query:
-        return redirect('/')
-
-    try:
-        page = abs(int(page))
-    except:
-        page = 0
-
-    query = query.lower()
-    #query = unicodedata.normalize('NFKD', query).encode('ASCII', 'ignore')
-    words = query.split()[:5] #max 5 words for querying...
-
-    #words = map(secure_filename, words)
-
-    query = " ".join(words)
-    
-
-    #words = map(lemmatize, words)
-
-    if not words:
-        return redirect('/')
-
-    result = get_results(words, page)
-    rows, speed, next_button = result
-    rows = result[0]
-
-    route = '/search?s=' + '+'.join(query.split(' ')) + '&p='
-    return render_template('index.html', title='Search', user_request=query, user=session.get('user'), rows=rows, speed=speed, next_button=next_button, prev_button=page-1, favorites=get_user_favorites(session.get('userid')), route=route)
-
 @app.route('/upload', methods=['POST'])
 def uploaded_page():
-    if not app.config['ALLOW_UPLOAD']:
-        return render_template('search.html')
+    # if not app.config['ALLOW_UPLOAD']:
+    #     return render_template('search.html')
 
     # FIXME : this function is too long (in lines and speed) !! use a thread ?
     try:
@@ -83,6 +49,8 @@ def uploaded_page():
 
         uploaded_file = request.files['file']
         file_name = uploaded_file.filename
+        
+        print(file_name)
 
         if not file_name:
             return "No file ?"
@@ -212,18 +180,19 @@ def make_temp_file(suffix):
 
 @app.before_request
 def check_auth():
-    AUTH_PATHS = ['/login', '/callback', '/register', '/logout']
+    PUBLIC_PATHS = ['/login', '/callback', '/register', '/logout', '/', '/search']
     if request.path.startswith('/static/styles') or request.path == '/favicon.ico':
         return
     print("{} {}".format(request.method, request.path))
     if request.path.startswith('/admin') and session.get('user').get('user_type') != 'ADMIN':
         return redirect('/')
-    if request.path in AUTH_PATHS:
+    if request.path in PUBLIC_PATHS:
         return
     if not session or not session.get('user'):
         return redirect('/login')
     session['user'] = get_user_by_id(session.get('userid'))
     session['user']['name'] = session.get('user').get('given_name') + " " + session.get('user').get('family_name')
+    session['favorites'] = get_user_favorites(session.get('userid'))
     # user = session.get('user')
     # if not user.get('campus') or not user.get('college') or not user.get('department'):
     #     return redirect('/register')
@@ -233,40 +202,90 @@ def check_auth():
 
 # page routes
 @app.route('/', methods=['GET'])
-def index():
-    page = request.args.get('p')
-
-    try:
-        page = abs(int(page))
-    except:
-        page = 0
-
-    rows, speed, next_button = get_recents(page=page)
-    return render_template('index.html', title='Home', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/?p=')
-
+@app.route('/search', methods=['GET'])
 @app.route('/history', methods=['GET'])
-def history_page():
-    page = request.args.get('p')
-
-    try:
-        page = abs(int(page))
-    except:
-        page = 0
-        
-    rows, speed, next_button = get_history(session.get('userid'), page=page)
-    return render_template('index.html', title='View History', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/history?p=')
-
 @app.route('/favorites', methods=['GET'])
-def favorites_page():
-    page = request.args.get('p')
-
+def list_page():
     try:
-        page = abs(int(page))
+        page = abs(int(request.args.get('p')))
     except:
         page = 0
 
-    rows, speed, next_button = get_favorites(session.get('userid'), page=page)
-    return render_template('index.html', title='Favorites', rows=rows, speed=speed, next_button=next_button, prev_button=page-1, user=session.get('user'), favorites=session.get('favorites'), route='/favorites?p=')
+    if (request.path =='/search'):
+        query = request.args.get('s')
+
+        if not query:
+            return redirect('/')
+
+        query = query.lower()
+        #query = unicodedata.normalize('NFKD', query).encode('ASCII', 'ignore')
+        words = query.split()[:5] #max 5 words for querying...
+
+        #words = map(secure_filename, words)
+
+        # query = " ".join(words)
+        
+        # words = map(lemmatize, words)
+
+        # if not words:
+        #     return redirect('/')
+        
+        # route = '/search?s=' + '+'.join(query.split(' ')) + '&p='
+        route = '/search?s=' + '+'.join(words) + '&p='
+        title = 'Search'
+
+        result = get_results(words, page)
+        rows, speed, next_button = result
+        rows = result[0]
+
+    elif (request.path == '/history'):
+        title = 'View History'
+        rows, speed, next_button = get_history(session.get('userid'), page=page)
+    elif (request.path == '/favorites'):
+        title = 'Favorites'
+        rows, speed, next_button = get_favorites(session.get('userid'), page=page)
+    else:
+        title = 'Home'
+        rows, speed, next_button = get_recents(page=page)
+
+    try:
+        route = route
+    except:
+        route = request.path + '?p='
+
+    if session.get('user'):
+        return render_template(
+            'index.html',
+            title = title,
+            rows = rows,
+            speed = speed,
+            next_button = next_button,
+            prev_button = page-1,
+            user = session.get('user'),
+            favorites = session.get('favorites'),
+            route = route,
+            baseURL = app.config['BASE_URL']
+        )
+    else:
+        res = make_response(
+            render_template(
+                'index.html',
+                title = title,
+                rows = rows,
+                speed = speed,
+                next_button = next_button,
+                prev_button = page-1,
+                user = None,
+                favorites = '[]',
+                route = route,
+                baseURL = app.config['BASE_URL'],
+                client_id = app.config['GOOGLE_CLIENT_ID'], 
+                oauth_callback_url = app.config['BASE_URL'] + '/callback'
+            )
+        )
+        res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
+        res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
+        return res
     
 @app.route('/upload', methods=['GET'])
 def upload_page():
@@ -277,7 +296,13 @@ def upload_page():
 @app.route('/register', methods=['GET'])
 def register():
     return redirect('/')
-    return render_template('register.html', title='Signup', user=session['user'])
+    # return render_template('register.html', title='Signup', user=session['user'])
+
+@app.route('/research_paper/<pdf_name>')
+def view_pdf(pdf_name):
+    pdf_title = get_title_by_name(pdf_name)
+    pdf = get_research_paper(get_pdfid_by_name(pdf_name))
+    return render_template('pdf.html', title=pdf_title, user=session.get('user'), pdf = pdf, baseURL = app.config['BASE_URL'])
 
 
 
@@ -293,6 +318,21 @@ def delete_pdf_endpoint(pdfid):
         pdf_name = get_pdf_name_by_id(pdfid)
         # delete_from_db(pdf_name)
         return jsonify({ 'status': 200, 'message': 'PDF {} successfully deleted from database.'.format(pdf_name)})
+    abort(403)
+
+@app.route('/api/pdf/<pdfid>', methods=['PUT'])
+def edit_pdf_endpoint(pdfid):
+    if get_upload_permission(session.get('userid')):
+        pdf = request.json
+        for key, value in pdf.items():
+            if value != get_pdf_value(pdf.get('id'),key):
+                update_pdf_value(pdf.get('id'), key, value)
+        pdf = get_research_paper(pdfid)
+        return jsonify({
+            'status': 200,
+            'message': 'Successfully edited research paper',
+            'pdf': pdf,
+        })
     abort(403)
 
 @app.route('/register', methods=['POST'])
@@ -332,7 +372,7 @@ def toggle_upload_permission(username):
 # auth routes
 @app.route('/login', methods=['GET'])
 def login():
-    res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = "http://localhost:5000/callback"))
+    res = make_response(render_template('login.html', client_id = app.config['GOOGLE_CLIENT_ID'], oauth_callback_url = app.config['BASE_URL'] + '/callback'))
     res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
     res.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups')
     return res
@@ -345,13 +385,14 @@ def callback():
         user = upsert_user(user_google_data)
         session['user'] = { **user, "name" : user.get('given_name') + " " + user.get('family_name') }
         session['userid'] = user_google_data['userid']
+        session['favorites'] = get_user_favorites(user_google_data['userid'])
 
     return redirect('/')
 
 @app.route('/logout', methods=['GET'])
 def logout():
-    session = None
-    return redirect('/login')
+    session.clear()
+    return redirect('/')
 
 
 

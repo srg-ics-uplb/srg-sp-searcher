@@ -166,3 +166,51 @@ def set_next_button(count, page, limit):
   if count > page * limit:
     return page
   return 0
+
+def get_title_by_name(pdf_name):
+  sql = "SELECT title FROM PDF WHERE name = '{}'".format(pdf_name)
+  data = db_execute(sql)[0]
+  return data[0]
+
+def get_research_paper(pdfid):
+  sql = """SELECT
+      ID,
+      NAME,
+      DATE,
+      TITLE,
+      AUTHORS,
+      YEAR,
+      MONTH,
+      ABSTRACT,
+      INDEX_TERMS
+    FROM PDF
+    WHERE ID = {}""".format(pdfid)
+  
+  data = db_execute(sql)[0]
+
+  pdf = {
+    "id":           data[0],
+    "name":         data[1],
+    "date":         data[2],
+    "title":        data[3],
+    "authors":      data[4],
+    "year":         data[5],
+    "month":        data[6],
+    "abstract":     data[7],
+    "index_terms":  data[8].split(',')
+  }
+
+  return pdf
+
+def get_pdf_value(pdfid, column):
+  sql = "SELECT {} FROM PDF WHERE ID = {}".format(column, pdfid)
+  data = db_execute(sql)[0]
+  return data[0]
+
+def update_pdf_value(pdfid, column, value):
+  sql = """UPDATE PDF SET
+    {} = "{}"
+    WHERE ID = {}
+  """.format(column, value, pdfid)
+  db_execute(sql)
+  return

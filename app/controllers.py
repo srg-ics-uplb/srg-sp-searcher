@@ -184,7 +184,6 @@ def get_history(userid, page):
 def get_favorites(userid, page):
     favorites = get_user_favorites(userid)
     return get_pdfs_by_ids(favorites, page=page)
-    
 
 def add_pdf_to_view_history(pdf_name, userid):
     pdfid = get_pdfid_by_name(name=pdf_name)
