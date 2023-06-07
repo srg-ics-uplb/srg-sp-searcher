@@ -71,6 +71,9 @@ host is configured for passwordless access.
 
 Do the install for the new version. If there are no changes in the db schema,
 copy the previous version's `app/sql/users.db`, `app/sql/pdf.db`, and `app/static/pdf` to the new version
+Add client_secrets.json
+Change the BASE_URL in config
+
 
 ## Pull Requests
 Contributions can be done using pull requests to the dev branch.
