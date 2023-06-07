@@ -5,6 +5,10 @@
   --font2-color: #000;
 }
 
+.hidden {
+  display: none;
+}
+
 /* @media (prefers-color-scheme: light) {
   :root {
     --bg-color: #cdcdcd;
@@ -168,10 +172,6 @@ footer form button {
 
 footer form textarea {
   height: 5em;
-}
-
-.hidden {
-  display: none;
 }
 
 .delete-link,

@@ -31,8 +31,8 @@ import unicodedata
 
 @app.route('/upload', methods=['POST'])
 def uploaded_page():
-    if not app.config['ALLOW_UPLOAD']:
-        return render_template('search.html')
+    # if not app.config['ALLOW_UPLOAD']:
+    #     return render_template('search.html')
 
     # FIXME : this function is too long (in lines and speed) !! use a thread ?
     try:
@@ -49,6 +49,8 @@ def uploaded_page():
 
         uploaded_file = request.files['file']
         file_name = uploaded_file.filename
+        
+        print(file_name)
 
         if not file_name:
             return "No file ?"
@@ -294,17 +296,18 @@ def upload_page():
 @app.route('/register', methods=['GET'])
 def register():
     return redirect('/')
-    return render_template('register.html', title='Signup', user=session['user'])
+    # return render_template('register.html', title='Signup', user=session['user'])
 
-@app.route('/view_pdf/<pdf_name>')
+@app.route('/research_paper/<pdf_name>')
 def view_pdf(pdf_name):
     pdf_title = get_title_by_name(pdf_name)
-    return render_template('pdf.html', title=pdf_title, pdf_url= app.config['BASE_URL'] + '/pdf/' + pdf_name, user=session.get('user'))
+    pdf = get_research_paper(get_pdfid_by_name(pdf_name))
+    return render_template('pdf.html', title=pdf_title, user=session.get('user'), pdf = pdf, baseURL = app.config['BASE_URL'])
 
 
 
 # api routes
-@app.route('/api/user/saved-trs/<pdfid>', methods=['PUT', 'OPTIONS'])
+@app.route('/api/user/saved-trs/<pdfid>', methods=['PUT'])
 def edit_favorites(pdfid):
     session['favorites'] = toggle_pdf_favorite(int(pdfid), session.get('userid'))
     return jsonify({ 'favorites' : session.get('favorites'), 'status' : 200 })
@@ -315,6 +318,21 @@ def delete_pdf_endpoint(pdfid):
         pdf_name = get_pdf_name_by_id(pdfid)
         # delete_from_db(pdf_name)
         return jsonify({ 'status': 200, 'message': 'PDF {} successfully deleted from database.'.format(pdf_name)})
+    abort(403)
+
+@app.route('/api/pdf/<pdfid>', methods=['PUT'])
+def edit_pdf_endpoint(pdfid):
+    if get_upload_permission(session.get('userid')):
+        pdf = request.json
+        for key, value in pdf.items():
+            if value != get_pdf_value(pdf.get('id'),key):
+                update_pdf_value(pdf.get('id'), key, value)
+        pdf = get_research_paper(pdfid)
+        return jsonify({
+            'status': 200,
+            'message': 'Successfully edited research paper',
+            'pdf': pdf,
+        })
     abort(403)
 
 @app.route('/register', methods=['POST'])
