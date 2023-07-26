@@ -1,10 +1,8 @@
 <header>
   <div>
-    <a href="/"><h1>UPLB ICS Peak One</h1></a>
-    <form action="/search" method="GET" >
-      <input type="text" id="s" name="s" placeholder="Maximum of 5 words" required>
-      <button type="submit" >Search</button>
-    </form>
+    <h3>
+      <a href="/"><h1>UPLB ICS Peak One</h1></a>
+    </h3>
     {% if user %}
       <div id="profile">
         <img src="{{ user.get('picture') }}" alt="User Profile" />

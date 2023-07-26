@@ -71,7 +71,9 @@ def get_pdfs_by_ids(pdfid_list,limit=5,page=0):
   start_time = time()
 
   if len(pdfid_list):
-    pdfid_page = [pdfid_list[i * limit:(i + 1) * limit] for i in range((len(pdfid_list) + limit - 1) // limit )][page]
+    pdfid_page = pdfid_list
+    if limit != 0:
+      pdfid_page = [pdfid_list[i * limit:(i + 1) * limit] for i in range((len(pdfid_list) + limit - 1) // limit )][page]
 
     if len(pdfid_page):
       for pdfid in pdfid_page:

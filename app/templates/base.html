@@ -1,23 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %} {% endblock %} | UPLB ICS Peak One</title>
-  <style>{% block style %} {% endblock %}</style>
+  <style>{% block style %}{% endblock %}</style>
 
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/search.css') }}">
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/results.css') }}">
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/template.css') }}">
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/table.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/search.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/results.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/template.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/table.css') }}">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
+
 <body>
   {% if not user %}
-  <div id="g_id_onload"
-      data-client_id="{{ client_id }}"
-      data-login_uri="{{ oauth_callback_url }}">
+  <div id="g_id_onload" data-client_id="{{ client_id }}" data-login_uri="{{ oauth_callback_url }}">
   </div>
   {% endif %}
 
@@ -35,4 +35,5 @@
     })
   </script>
 </body>
+
 </html>

@@ -211,6 +211,9 @@ def list_page():
     except:
         page = 0
 
+    user_favorites = get_user_favorites(session.get('userid'))
+    favorite_pdfs = get_pdfs_by_ids(user_favorites, limit=0)[0]
+
     if (request.path =='/search'):
         query = request.args.get('s')
 
@@ -253,6 +256,9 @@ def list_page():
     except:
         route = request.path + '?p='
 
+    print(favorite_pdfs)
+    # print(rows)
+
     if session.get('user'):
         return render_template(
             'index.html',
@@ -263,6 +269,7 @@ def list_page():
             prev_button = page-1,
             user = session.get('user'),
             favorites = session.get('favorites'),
+            favorite_pdfs = favorite_pdfs,
             route = route,
             baseURL = app.config['BASE_URL']
         )
@@ -277,6 +284,7 @@ def list_page():
                 prev_button = page-1,
                 user = None,
                 favorites = '[]',
+                favorite_pdfs = '[]',
                 route = route,
                 baseURL = app.config['BASE_URL'],
                 client_id = app.config['GOOGLE_CLIENT_ID'], 
