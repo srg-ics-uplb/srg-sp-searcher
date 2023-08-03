@@ -3,10 +3,11 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block main %}
-<table rules="all">
+<table rules="all" id="users-tbl">
   <thead>
     <th>Email</th>
     <th>Name</th>
+    <th>User Type</th>
     <th>Upload</th>
     <th>Delete</th>
   </thead>
@@ -14,9 +15,15 @@
     {% for user in users %}
     {% set username = user['email'] %}
     <tr>
-      <td>{{ user.get('email') }}</td>
+      <td>{{ user['email'] }}</td>
       <td>{{ user.get('name') }}</td>
-      <!-- <td>{{ user.get('allow_upload') }}</td> -->
+      <td>
+        <select name="type" id="{{ user.get('username') }}-type" data-userid="{{ user['id'] }}">
+          <option value="ADMIN">Admin</option>
+          <option value="FACULTY">Faculty</option>
+          <option value="STUDENT">Student</option>
+        </select>
+      </td>
       <td><button class="upload-btn" id="{{ user.get('username') }}-upload">
           {% if user.get('allow_upload') == 0 %}
           Not Allowed
@@ -24,7 +31,6 @@
           Allowed
           {% endif %}
         </button></td>
-      <!-- <td>{{ user.get('allow_delete') }}</td> -->
       <td><button class="delete-btn" id="{{ user.get('username') }}-delete">
           {% if user.get('allow_delete') == 0 %}
           Not Allowed
@@ -38,8 +44,38 @@
 </table>
 
 <script>
-  const baseUrl = 'http://localhost:5000';
   let users = {{ users| tojson | safe }};
+
+  document.getElementsByName('type').forEach( elem => {
+    let userid = elem.getAttribute('data-userid');
+    let user = users.filter(user => user.id === userid)[0];
+
+    elem.addEventListener('change', ev => {
+      ev.preventDefault();
+
+      let newUserType = elem.value;
+      let newUserTypeOption = Array.from(elem.children).filter( option => option.value == newUserType )[0];
+
+      let loadingOption = document.createElement('option');
+      loadingOption.textContent = 'Loading ...';
+      loadingOption.selected = true;
+
+      elem.appendChild(loadingOption);
+
+      fetch(`/api/user/${userid}/userType/${newUserType}`, {
+        method: 'PUT'
+      })
+        .then( response => response.json())
+        .then( data => {
+          newUserTypeOption.selected = true;
+        })
+        .catch( err => {
+          let oldUserTypeOption = Array.from(elem.children).filter( option => option.value == user.user_type )[0];
+          oldUserTypeOption.selected = true;
+        })
+        .finally(() => loadingOption.remove())
+    })
+  })
 
   document.querySelectorAll(`.delete-btn`).forEach(btn => {
     let username = btn.id.slice(0, -7);
@@ -51,11 +87,12 @@
       ev.preventDefault();
       let defaultTxt = btn.textContent;
       btn.textContent = 'Loading...';
-      fetch(`${baseUrl}/api/user/${username}/delete-permit`, {
+      fetch(`/api/user/${username}/delete-permit`, {
         method: 'PUT'
       })
         .then(response => response.json())
         .then(data => {
+          console.log(data);
           updatePermit(btn, data.deletePermit)
         })
         .catch(err => {
@@ -75,7 +112,7 @@
       ev.preventDefault();
       let defaultTxt = btn.txtContent;
       btn.textContent = 'Loading...';
-      fetch(`${baseUrl}/api/user/${username}/upload-permit`, {
+      fetch(`/api/user/${username}/upload-permit`, {
         method: 'PUT'
       })
         .then(response => response.json())

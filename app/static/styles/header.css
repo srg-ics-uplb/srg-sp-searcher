@@ -1,0 +1,91 @@
+header {
+  width: 100vw;
+  background-color: var(--bg-color);
+  color: var(--font2-color);
+  box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+header > div {
+  width: min(90vw, 1600px);
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 2em;
+}
+
+header h3 {
+  margin: 0;
+  padding: 0;
+}
+
+header h3 a {
+  color: var(--up-maroon);
+}
+
+header button,
+header a {
+  text-decoration: none;
+  font-weight: bold;
+}
+
+header > div > a {
+  color: var(--font-color);
+}
+
+header > div > div {
+  cursor: pointer;
+  width: max-content;
+  display: flex;
+  align-items: center;
+  gap: .5em;
+  font-weight: bold;
+  position: relative;
+}
+
+header > div > div img {
+  border-radius: 50%;
+  aspect-ratio: 1/1;
+  width: 3em;
+}
+
+#profile {
+  position: relative;
+}
+
+header nav {
+  display: flex;
+  flex-flow: nowrap column;
+
+  overflow: hidden;
+  position: absolute;
+  top: 3.5em;
+  left: 0;
+
+  border: 1px solid black;
+  border-radius: .5em;
+  background-color: var(--font-color);
+}
+
+header nav a {
+  width: 100%;
+  padding: .5em;
+  box-sizing: border-box;
+  color: var(--bg-color);
+  white-space: nowrap;
+}
+
+header nav a:hover {
+  cursor: pointer;
+  background-color: var(--bg-color);
+  color: var(--font-color);
+}
+
+header nav a > svg {
+  height: 1em;
+  fill: var(--bg-color);
+}
+
+header nav a:hover > svg {
+  fill: var(--font-color);
+}he

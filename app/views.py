@@ -184,18 +184,15 @@ def check_auth():
     if request.path.startswith('/static/styles') or request.path == '/favicon.ico':
         return
     print("{} {}".format(request.method, request.path))
-    if request.path.startswith('/admin') and session.get('user').get('user_type') != 'ADMIN':
+    if request.path.startswith('/admin') and session.get('user', {'user_type': 'STUDENT'})['user_type'] != 'ADMIN':
         return redirect('/')
     if request.path in PUBLIC_PATHS:
         return
     if not session or not session.get('user'):
         return redirect('/login')
-    session['user'] = get_user_by_id(session.get('userid'))
-    session['user']['name'] = session.get('user').get('given_name') + " " + session.get('user').get('family_name')
+    session['user'] = get_user_by_id(session['userid'])
+    session['user']['name'] = session['user'].get('given_name') + " " + session['user'].get('family_name')
     session['favorites'] = get_user_favorites(session.get('userid'))
-    # user = session.get('user')
-    # if not user.get('campus') or not user.get('college') or not user.get('department'):
-    #     return redirect('/register')
     return
 
 
@@ -211,8 +208,9 @@ def list_page():
     except:
         page = 0
 
-    user_favorites = get_user_favorites(session.get('userid'))
-    favorite_pdfs = get_pdfs_by_ids(user_favorites, limit=0)[0]
+    if (session):
+        user_favorites = get_user_favorites(session.get('userid'))
+        favorite_pdfs = get_pdfs_by_ids(user_favorites, limit=0)[0]
 
     if (request.path =='/search'):
         query = request.args.get('s')
@@ -255,10 +253,7 @@ def list_page():
         route = route
     except:
         route = request.path + '?p='
-
-    print(favorite_pdfs)
-    # print(rows)
-
+        
     if session.get('user'):
         return render_template(
             'index.html',
@@ -300,11 +295,6 @@ def upload_page():
     if get_upload_permission(get_userid_by_email(session.get('user').get('email'))):
         return render_template('upload.html', title='Upload', user=session.get('user'))
     return redirect('/')
-
-@app.route('/register', methods=['GET'])
-def register():
-    return redirect('/')
-    # return render_template('register.html', title='Signup', user=session['user'])
 
 @app.route('/research_paper/<pdf_name>')
 def view_pdf(pdf_name):
@@ -374,6 +364,18 @@ def toggle_upload_permission(username):
 
     return jsonify({ 'status': 200, 'message': 'User upload permit changed.', 'uploadPermit': allow_upload })
 
+@app.route('/api/user/<userid>/userType/<newUserType>', methods=['PUT'])
+def edit_user_type(userid, newUserType):
+    print(userid)
+    print(newUserType)
+    userType = set_user_type(userid, newUserType)
+
+    return jsonify({
+        'status'        : 200,
+        'message'       : 'User type changed.',
+        'userType'      : userType,
+    })
+
 
 
 
@@ -406,7 +408,8 @@ def logout():
 
 # admin routes
 @app.route('/admin', methods=['GET'])
-def admin_page():
+@app.route('/admin/users', methods=['GET'])
+def user_page():
     users = list_users()
     new_users = []
     for user in users:

@@ -8,3 +8,15 @@ table th,
 table td {
   padding: .5em 1em;
 }
+
+table td:has( > select) {
+  padding: .25em;
+}
+
+table td select:focus,
+table td select:focus-within,
+table td select {
+  border: none;
+  width: 100%;
+  font-size: 1em;
+}
