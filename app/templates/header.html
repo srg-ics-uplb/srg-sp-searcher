@@ -49,5 +49,12 @@
       activeLink[0].classList.add('active');
     else 
       document.querySelector('#home-link').classList.add('active');
+      
+
+    let isNavVisible = false;
+    document.getElementById('menu-btn').onclick = ev => {
+      document.querySelector('header nav').style.display = isNavVisible ? 'none' : 'flex';
+      isNavVisible = !isNavVisible;
+    }
   </script>
 </header>
