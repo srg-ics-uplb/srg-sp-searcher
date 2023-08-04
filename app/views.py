@@ -186,7 +186,7 @@ def check_auth():
     print("{} {}".format(request.method, request.path))
     if request.path.startswith('/admin') and session.get('user', {'user_type': 'STUDENT'})['user_type'] != 'ADMIN':
         return redirect('/')
-    if request.path in PUBLIC_PATHS:
+    if request.path in PUBLIC_PATHS or request.path.startswith('/research_paper'):
         return
     if not session or not session.get('user'):
         return redirect('/login')
@@ -300,7 +300,7 @@ def upload_page():
 def view_pdf(pdf_name):
     pdf_title = get_title_by_name(pdf_name)
     pdf = get_research_paper(get_pdfid_by_name(pdf_name))
-    return render_template('pdf.html', title=pdf_title, user=session.get('user'), pdf = pdf, baseURL = app.config['BASE_URL'])
+    return render_template('pdf.html', title=pdf_title, user=session.get('user', None), pdf = pdf, baseURL = app.config['BASE_URL'])
 
 
 

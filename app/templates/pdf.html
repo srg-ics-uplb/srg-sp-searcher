@@ -22,7 +22,7 @@
         <h2>{{ pdf.get('authors') }}</h2>
         <p>Published {{ pdf.get('month') }} {{ pdf.get('year') }}</p>
         <div>
-          {% if session['user'].get('user_type') == 'ADMIN' %}
+          {% if user and user.get('user_type') == 'ADMIN' %}
             <button id="edit-btn">Edit</button>
           {% endif %}
         </div>
@@ -75,7 +75,11 @@
         </form>
       </div>
     </div>
-    <iframe src="{{ baseURL + '/pdf/' + pdf.get('name') }}" width="100%" height="1000"></iframe>
+    {% if user %}
+      <iframe src="{{ '/pdf/' + pdf.get('name') }}" width="100%" height="1000"></iframe>
+    {% else %}
+      <h1>You must be logged in with your UP email to view the full report.</h1>
+    {% endif %}
   </div>
 
   <script>

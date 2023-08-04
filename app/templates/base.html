@@ -18,10 +18,12 @@
 </head>
 
 <body>
+  {% if not user %}
   <div id="g_id_onload"
-    data-client_id="{{ client_id }}"
+    data-client_id="696707186269-vusumn77j1l0gur6ulkkf1orgvskinok.apps.googleusercontent.com"
     data-login_uri="/callback">
   </div>
+  {% endif %}
   {% include 'header.html' %}
 
   <main>
