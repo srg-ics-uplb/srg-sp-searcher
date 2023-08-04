@@ -6,7 +6,6 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %} {% endblock %} | UPLB ICS Peak One</title>
-  <style>{% block style %}{% endblock %}</style>
   <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 
   <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/template.css') }}">
@@ -19,11 +18,10 @@
 </head>
 
 <body>
-  {% if not user %}
-  <div id="g_id_onload" data-client_id="{{ client_id }}" data-login_uri="{{ oauth_callback_url }}">
+  <div id="g_id_onload"
+    data-client_id="{{ client_id }}"
+    data-login_uri="/callback">
   </div>
-  {% endif %}
-
   {% include 'header.html' %}
 
   <main>
@@ -31,12 +29,6 @@
   </main>
 
   {% include 'footer.html' %}
-
-  <script>
-    document.querySelector('#profile').addEventListener('click', () => {
-      document.querySelector('#nav').classList.toggle('hidden')
-    })
-  </script>
 </body>
 
 </html>

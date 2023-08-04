@@ -76,15 +76,14 @@
   /* outline: 1px solid red; */
 }
 
+html {
+  overflow: auto;
+}
+
 body {
   min-height: 100vh;
-  max-width: 100vw;
+  width: 100vw;
   margin: 0;
-  box-sizing: border-box;
-  font-family: sans-serif;
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: scroll;
 
   background-color: var(--bg-color);
   color: var(--font-color);
@@ -103,15 +102,6 @@ h1, h2, h3, h4, h5, h6 {
 main {
   width: min(90vw, 1600px);
   margin: 3em auto;
-
-  /* display: grid;
-  justify-content: center;
-  align-items: center; */
-}
-
-.delete-link,
-.favorite-link {
-  cursor: pointer;
 }
 
 main form {
@@ -150,30 +140,6 @@ main form input[type="submit"] {
   background-color:green;
 }
 
-#search-form {
-  width: min(900px, 90%);
-  display: flex;
-  gap: 0;
-  padding-top: 0;
-}
-
-#search-form * {
-  margin: 0;
-  padding: .5em 1em;
-}
-
-#search-form input {
-  flex-grow: 1;
-}
-
-#search-form button[type="submit"] {
-  all: unset;
-  cursor: pointer;
-  border: 1px solid black;
-  padding: .5em 1em;
-  font-weight: 900;
-}
-
 main button {
   all: unset;
   cursor: pointer;
@@ -182,14 +148,6 @@ main button {
   font-weight: bold;
   color: white;
   background-color: green;
-}
-
-.result a {
-  font-weight: bold;
-}
-
-.result a:hover {
-  text-decoration: underline;
 }
 
 main a > svg {

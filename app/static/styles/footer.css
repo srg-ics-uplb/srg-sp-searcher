@@ -14,7 +14,7 @@ footer > div {
   width: min(90vw, 1600px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
 }
 
 footer div > div {
@@ -45,4 +45,10 @@ footer form button {
 
 footer form textarea {
   height: 5em;
+}
+
+@media only screen and (min-width: 768px) {
+  footer > div {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

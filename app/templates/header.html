@@ -1,31 +1,39 @@
 <header>
   <div>
+    
+    <button id="menu-btn">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M4 6H20M4 12H20M4 18H20" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+    </button>
+
     <h3>
       <a href="/"><h1>UPLB ICS Peak One</h1></a>
     </h3>
     {% if user %}
-      <div id="profile">
+      {# <div id="profile">
         <img src="{{ user.get('picture') }}" alt="User Profile" />
         {{ user['name'] }}
         <nav id="nav" class="hidden">
           {% if user['user_type'] == 'ADMIN' %}
             <a href="/admin/users">User Management</a>
-            <a href="/upload">Add Research Paper</a>
+            <a href="/upload">Submit Research Paper</a>
           {% endif %}
           <a href="/history">History</a>
           <a href="/logout">Logout</a>
         </nav>
-      </div>
+      </div> #}
+      <nav>
+        <a href="/" id="home-link">Home</a>
+        {% if user['user_type'] == 'ADMIN' %}
+          <a href="/admin">Admin Dashboard</a>
+        {% endif %}
+        <a href="/favorites">Favorites</a>
+        <a href="/history">View History</a>
+        <a href="/logout">Logout</a>
+      </nav>
     {% else %}
       <!-- 'Sign in with Google' button -->
-      <script src="https://accounts.google.com/gsi/client" async defer></script>
-      <div id="g_id_onload"
-        data-client_id="{{ client_id }}"
-        data-login_uri="{{ oauth_callback_url }}"
-        data-auto_prompt="false">
-      </div>
       <div class="g_id_signin"
-        data-type="standard"
+        data-type="icon"
         data-size="large"
         data-theme="outline"
         data-text="sign_in_with"
@@ -34,4 +42,12 @@
       </div>
     {% endif %}
   </div>
+
+  <script>
+    let activeLink = Array.from(document.querySelectorAll('header nav a')).filter( anchor => anchor.id != 'home-link' && '{{ request.url }}'.startsWith(anchor.href));
+    if ( activeLink.length == 1 )
+      activeLink[0].classList.add('active');
+    else 
+      document.querySelector('#home-link').classList.add('active');
+  </script>
 </header>
