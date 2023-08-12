@@ -1,7 +1,9 @@
 app/__pycache__/
 __pycache__/
 app/static/pdf
-app/sql/old/
+app/sql/tmp_scrips/*.db
+app/sql/tmp_scrips/migrate/new/*.db
+app/sql/tmp_scrips/migrate/old/*.db
 app/sql/pdf.db
 app/sql/users.db
 .keep

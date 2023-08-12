@@ -386,8 +386,6 @@ def edit_user_type(userid, newUserType):
 @app.route('/api/pdf/<pdfid>', methods=['DELETE'])
 @app.route('/api/pdf/<pdfid>/status/<pdf_status>', methods=['PUT'])
 def edit_pdf_status(pdfid, pdf_status):
-    print(pdfid)
-    print(pdf_status)
     set_pdf_status(pdfid, pdf_status)
 
     return jsonify({

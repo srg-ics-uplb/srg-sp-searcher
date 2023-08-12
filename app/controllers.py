@@ -228,7 +228,7 @@ month,
 abstract, 
 index_terms, 
 uploaded_by, 
-pdf_status
+status
 ) VALUES (
 '{pdf['name']}',
 '{hash_file(path)}',
