@@ -42,7 +42,7 @@
           <a class="favorite-link"></a>
           |
           {% if user.get('allow_delete') == 1 %}
-          <strong><a class="delete-link">DELETE</a></strong>
+          <strong><a class="delete-link" data-pdfid="{{ row['id'] }}" data-title="{{ row['title'] }}">DELETE</a></strong>
           |
           {% endif %}
           {% endif %}
@@ -93,6 +93,10 @@
   let favorites = {{ favorites| tojson | safe }};
   let favorite_pdfs = {{ favorite_pdfs| tojson | safe }};
 
+  {% if pendingUpload %}
+    alert('You have a pending upload.');
+  {% endif %}
+
   updateFavoriteLinks();
 
   document.querySelectorAll('.favorite-link').forEach(elem => {
@@ -100,7 +104,7 @@
       ev.preventDefault();
       console.log(ev.target.parentElement.parentElement.id)
       fetch(
-        '{{ baseURL }}/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
+        '/api/user/saved-trs/' + ev.target.parentElement.parentElement.id,
         { method: 'PUT' }
       )
         .then(response => response.json())
@@ -114,25 +118,24 @@
     })
   })
 
+  {% if user['allow_delete'] == 1 %}
+
   document.querySelectorAll('.delete-link').forEach(elem => {
     elem.addEventListener('click', ev => {
       ev.preventDefault();
-      document.getElementById(ev.target.parentElement.parentElement.id).classList.add('hidden');
-      fetch(
-        '{{ baseURL }}/api/pdf/' + ev.target.parentElement.parentElement.id,
-        { method: 'DELETE' }
-      )
-        .then(response => response.json())
-        .then(data => {
-          console.log(data)
-          alert('Successfully deleted pdf from database.')
-        })
-        .catch(err => {
-          alert('User does not have delete privileges.');
-          document.getElementById(ev.target.parentElement.parentElement.id).classList.remove('hidden');
-        })
+
+      if (confirm(`Are you sure you want to delete, ${ev.currentTarget.getAttribute('data-title')}?`))
+        fetch(
+          `/api/pdf/${ev.currentTarget.getAttribute('data-pdfid')}/status/REMOVED`,
+          { method: 'PUT' }
+        )
+          .then( res => res.json())
+          .then( data => window.location.reload())
+          .catch( err => console.error(err))
     })
   })
+
+  {% endif %}
 
   function updateFavoriteLinks() {
     document.querySelectorAll('.favorite-link').forEach(elem => {

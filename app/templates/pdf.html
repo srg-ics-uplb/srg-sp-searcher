@@ -2,15 +2,20 @@
 
 {% block title %}{{ title }}{% endblock %}
 {% block style %}
-.main-div {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1em;
-}
-.index-term-btn {
-  cursor: pointer;
-  padding: .5em .25em;
-}
+<style>
+  .main-div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+  }
+  .index-term-container {
+    
+  }
+  .index-term-btn {
+    cursor: pointer;
+    padding: .5em 1em;
+  }
+</style>
 {% endblock %}
 
 {% block main %}
@@ -27,10 +32,12 @@
           {% endif %}
         </div>
         <h4>Abstract:</h4>
-        <p>{{ pdf.get('abstract') }}</p>
+        <p id="abstract-display"></p>
+        <div class="index-term-container">
         {% for tag in pdf.get('index_terms') %}
           <button class="index-term-btn"><strong>{{ tag }}</strong></button>
         {% endfor %}
+        </div>
       </div>
 
       <!-- edit info form -->
@@ -81,11 +88,12 @@
       <h1>You must be logged in with your UP email to view the full report.</h1>
     {% endif %}
   </div>
+{% endblock %}
 
+{% block script%}
   <script>
 
     document.querySelectorAll(`.index-term-btn`).forEach( elem => {
-      console.log(elem)
       elem.addEventListener('click', ev => {
         ev.preventDefault();
         search_term = elem.textContent.trim().split(' ').join('+')
@@ -106,6 +114,7 @@
     })
 
     document.querySelector(`#month`).value = `{{ pdf.get('month') }}`;
+    document.querySelector('#abstract-display').innerText = '{{ pdf['abstract'] | safe }}'.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&apos;/g, "'").replace(/&quot;/, '"');
 
     document.querySelector(`#edit-form input[type='submit']`).addEventListener('click', ev => {
       ev.preventDefault();

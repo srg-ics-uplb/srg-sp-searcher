@@ -1,3 +1,5 @@
+from flask import session
+
 import math
 import sqlite3
 import json
@@ -41,6 +43,7 @@ def get_most_recents(limit=3, page=0):
       SELECT
       NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT, ID
       FROM PDF
+      WHERE pdf_status = (SELECT id FROM pdf_status WHERE name = 'APPROVED')
       ORDER BY ID DESC LIMIT {} OFFSET {}
   """.format(limit, page*limit)
 
@@ -81,6 +84,7 @@ def get_pdfs_by_ids(pdfid_list,limit=5,page=0):
             SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
             FROM PDF
             WHERE ID = ({})
+            AND pdf_status = (SELECT id FROM pdf_status WHERE name = 'APPROVED')
         """.format(
             pdfid
         )
@@ -132,6 +136,7 @@ def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
           INNER JOIN
              (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
               FROM PDF) C ON A.PDF_ID = C.ID
+        WHERE pdf_status = (SELECT id FROM pdf_status WHERE name = 'APPROVED')
         GROUP BY A.PDF_ID
         ORDER BY SCORE DESC
         LIMIT {} OFFSET {}
@@ -210,9 +215,66 @@ def get_pdf_value(pdfid, column):
   return data[0]
 
 def update_pdf_value(pdfid, column, value):
+  activity = f"{get_pdf_value(pdfid, 'uploaded_by')} edited pdf#{pdfid}; set {column} from {get_pdf_value(pdfid, column)} to {value}"
+  sql = f"INSERT INTO LOGS (userid, pdfid, activity) VALUES ('{session['userid']}','{pdfid}','{activity}')"
+  db_execute(sql)
   sql = """UPDATE PDF SET
     {} = "{}"
     WHERE ID = {}
   """.format(column, value, pdfid)
   db_execute(sql)
   return
+
+def get_pdfs_by_status(status):
+  sql = f"SELECT id, name, date, title, authors, year, month, abstract, index_terms, pdf_status, uploaded_by FROM pdf WHERE pdf_status = (SELECT id FROM pdf_status WHERE name = '{status}')"
+  rows = db_execute(sql)
+
+  pdfs = []
+  if rows and len(rows) > 0:
+    for row in rows:
+      pdfs.append({
+        'id'            : row[0],
+        'name'          : row[1],
+        'date'          : datetime.utcfromtimestamp(int(row[2])).strftime('%d %b, %Y'),
+        'title'         : row[3],
+        'authors'       : row[4],
+        'year'          : row[5],
+        'month'         : row[6],
+        'abstract'      : row[7],
+        'index_terms'   : row[8],
+        'pdf_status'    : row[9],
+        'uploaded_by'   : row[10]
+      })
+
+  return pdfs
+
+def get_pdf_status(pdfid):
+  print(pdfid)
+  sql = f"SELECT pdf_status FROM pdf a JOIN pdf_status b ON a.pdf_status = b.id WHERE a.id = '{pdfid}'"
+  pdf = db_execute(sql)[0]
+
+  return pdf[0]
+
+def get_status_name(status_id):
+  sql = f"SELECT name FROM pdf_status WHERE id = {status_id}"
+  status_name = db_execute(sql)[0][0]
+  return status_name
+
+def set_pdf_status(pdfid, status):
+  activity = f"{get_pdf_value(pdfid, 'uploaded_by')} edited pdf#{pdfid}; set pdf_status from {get_status_name(get_pdf_status(pdfid))} to {status}"
+  sql = f"INSERT INTO LOGS (userid, pdfid, activity) VALUES ('{session['userid']}','{pdfid}','{activity}')"
+  db_execute(sql)
+  sql = f"UPDATE pdf SET pdf_status = (SELECT id FROM pdf_status WHERE name = '{status}') WHERE id = '{pdfid}'"
+  db_execute(sql)
+  return
+
+# check for user type; if user is student limit to one pending submission
+def user_has_pending_submission(email):
+  sql = f"SELECT * FROM pdf WHERE uploaded_by = '{email}' AND pdf_status = (SELECT id FROM pdf_status WHERE name = 'SUBMITTED')"
+  rows = db_execute(sql)
+
+  print(rows)
+
+  if rows is None or len(rows) == 0:
+    return False
+  return True

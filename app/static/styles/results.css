@@ -2,9 +2,15 @@
   display: none;
 }
 
+/* main * {
+  outline: 1px solid red;
+} */
+
 #index-content {
   width: 100%;
   margin: 0 auto;
+
+  grid-column: 1/-1;
   
   display: flex;
   gap: 2em;

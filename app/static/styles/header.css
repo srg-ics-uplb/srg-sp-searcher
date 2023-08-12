@@ -67,8 +67,18 @@ header nav a {
   color: #333;
 }
 
-header nav a:last-child {
+header nav a:last-of-type {
   border-bottom: 1px solid rgba(0,0,0,0.5);
+}
+
+header nav button {
+  cursor: pointer;
+  width: fit-content;
+  padding: .5em 1em;
+  margin: .5em auto;
+  background-color: var(--forest-green);
+  color: #fff;
+  font-weight: bold;
 }
 
 @media only screen and (min-width: 768px) {
@@ -84,7 +94,7 @@ header nav a:last-child {
   header nav {
     flex-grow: 0;
     width: auto;
-    height: 100%;
+    height: fit-content;
     display: flex;
     flex-flow: row nowrap;
 
@@ -106,6 +116,11 @@ header nav a:last-child {
 
   header nav a.active {
     box-shadow: 0px -15px 10px -15px #333 inset;
+  }
+
+  header nav button {
+    height: fit-content;
+    margin: auto 0 auto 3em;
   }
 }
 

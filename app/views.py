@@ -29,77 +29,79 @@ import unicodedata
 #     print(pdf_file,filename)
 #     return send_from_directory(pdf_file,filename)
 
-@app.route('/upload', methods=['POST'])
-def uploaded_page():
-    # if not app.config['ALLOW_UPLOAD']:
-    #     return render_template('search.html')
+# @app.route('/uploads', methods=['POST'])
+# def uploaded_page():
+#     # if not app.config['ALLOW_UPLOAD']:
+#     #     return render_template('search.html')
 
-    # FIXME : this function is too long (in lines and speed) !! use a thread ?
-    try:
-        if len(listdir(app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'])) > 200:
-            return "Too many pdf already uploaded...max is 200"
+#     # FIXME : this function is too long (in lines and speed) !! use a thread ?
+#     try:
+#         if len(listdir(app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'])) > 200:
+#             return "Too many pdf already uploaded...max is 200"
 
-        title = request.form['title']
-        authors = request.form['authors']
-        year = request.form['year']
-        month = request.form['month']
-        abstract = request.form['abstract']
-        index_terms = request.form['index_terms']
-        userid = session.get('userid')
+#         title = request.form['title']
+#         authors = request.form['authors']
+#         year = request.form['year']
+#         month = request.form['month']
+#         abstract = request.form['abstract']
+#         index_terms = request.form['index_terms']
+#         userid = session.get('userid')
 
-        uploaded_file = request.files['file']
-        file_name = uploaded_file.filename
+#         print(userid)
+
+#         uploaded_file = request.files['file']
+#         file_name = uploaded_file.filename
         
-        print(file_name)
+#         print(file_name)
 
-        if not file_name:
-            return "No file ?"
+#         if not file_name:
+#             return "No file ?"
 
-        file_name = str(int(time())) + "_" + secure_filename(file_name)
-        pdf_path = app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'] + file_name
-        print(pdf_path)
-        uploaded_file.save(pdf_path) #temporary save
+#         file_name = str(int(time())) + "_" + secure_filename(file_name)
+#         pdf_path = app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'] + file_name
+#         print(pdf_path)
+#         uploaded_file.save(pdf_path) #temporary save
 
-        # check if the hash all ready exists in the db
-        if pdf_allready_exists(file_name):
-            #remove the pdf from the directory
-            remove(pdf_path)
-            return "This pdf allready exist in the database... <a href='/search'>search</a>."        
+#         # check if the hash all ready exists in the db
+#         if pdf_allready_exists(file_name):
+#             #remove the pdf from the directory
+#             remove(pdf_path)
+#             return "This pdf allready exist in the database... <a href='/search'>search</a>."        
 
-        # "File temporary uploaded... processing it before adding it to database...</br>"
+#         # "File temporary uploaded... processing it before adding it to database...</br>"
 
-        counter = None
-        try:
-            #adding the file name to the text for searching by file name...
-            #norm_filnam = normalize_txt(file_name.replace('_', ' ').replace('.', ' ').replace('-', ' '))
-            #txt = read_as_txt(pdf_path) + " " + norm_filnam
-            # txt = read_as_txt(pdf_path) + " " + title + " " + authors + " " + year + " " + month
-            txt = abstract + " " + index_terms + " " + title + " " + authors + " " + year + " " + month
-            txt_arr = txt.split(' ')
-            txt = ""
-            for word in txt_arr:
-                txt = txt + " " + word.strip(',.')
+#         counter = None
+#         try:
+#             #adding the file name to the text for searching by file name...
+#             #norm_filnam = normalize_txt(file_name.replace('_', ' ').replace('.', ' ').replace('-', ' '))
+#             #txt = read_as_txt(pdf_path) + " " + norm_filnam
+#             # txt = read_as_txt(pdf_path) + " " + title + " " + authors + " " + year + " " + month
+#             txt = abstract + " " + index_terms + " " + title + " " + authors + " " + year + " " + month
+#             txt_arr = txt.split(' ')
+#             txt = ""
+#             for word in txt_arr:
+#                 txt = txt + " " + word.strip(',.')
 
-            if not txt:
-                remove(pdf_path)
-                return "We cann't extract nothing from this pdf... <a href='/search'>search</a>."
+#             if not txt:
+#                 remove(pdf_path)
+#                 return "We cann't extract nothing from this pdf... <a href='/search'>search</a>."
 
-            counter = get_word_cout(txt)
+#             counter = get_word_cout(txt)
 
-        except:
-            remove(pdf_path)
-            print(traceback.format_exc())
-            return "This is not a pdf... <a href='/search'>search</a>." 
+#         except:
+#             remove(pdf_path)
+#             print(traceback.format_exc())
+#             return "This is not a pdf... <a href='/search'>search</a>." 
 
-        pdfid = insert_pdf_to_db(file_name,title,authors,year,month,abstract,index_terms,userid) #add the pdf to the database 
-        total_words = sum(counter.values())
-        for word in counter: #update the words in database
-            insert_word_to_db(pdfid, word, counter[word] / float(total_words))
-        return redirect('/')
-        # return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdfid))
-    except:
-        abort(408)
-        return "Fail to uploadi."
+#         pdfid = insert_pdf_to_db(file_name,title,authors,year,month,abstract,index_terms,userid) #add the pdf to the database 
+#         total_words = sum(counter.values())
+#         for word in counter: #update the words in database
+#             insert_word_to_db(pdfid, word, counter[word] / float(total_words))
+#         return redirect('/')
+#         # return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdfid))
+#     except:
+#         abort(408)
+#         return "Fail to uploadi."
 
 
 # @app.route('/delete/<pdf_name>')
@@ -203,13 +205,16 @@ def check_auth():
 @app.route('/history', methods=['GET'])
 @app.route('/favorites', methods=['GET'])
 def list_page():
+    pendingUpload = session.get('pendingUpload', False)
+    if pendingUpload:
+        del session['pendingUpload']
     try:
         page = abs(int(request.args.get('p')))
     except:
         page = 0
 
     if (session):
-        user_favorites = get_user_favorites(session.get('userid'))
+        user_favorites = get_user_favorites(session['userid'])
         favorite_pdfs = get_pdfs_by_ids(user_favorites, limit=0)[0]
 
     if (request.path =='/search'):
@@ -241,10 +246,10 @@ def list_page():
 
     elif (request.path == '/history'):
         title = 'View History'
-        rows, speed, next_button = get_history(session.get('userid'), page=page)
+        rows, speed, next_button = get_history(session['userid'], page=page)
     elif (request.path == '/favorites'):
         title = 'Favorites'
-        rows, speed, next_button = get_favorites(session.get('userid'), page=page)
+        rows, speed, next_button = get_favorites(session['userid'], page=page)
     else:
         title = 'Home'
         rows, speed, next_button = get_recents(page=page)
@@ -266,7 +271,8 @@ def list_page():
             favorites = session.get('favorites'),
             favorite_pdfs = favorite_pdfs,
             route = route,
-            baseURL = app.config['BASE_URL']
+            baseURL = app.config['BASE_URL'],
+            pendingUpload = pendingUpload
         )
     else:
         res = make_response(
@@ -281,9 +287,8 @@ def list_page():
                 favorites = '[]',
                 favorite_pdfs = '[]',
                 route = route,
-                baseURL = app.config['BASE_URL'],
                 client_id = app.config['GOOGLE_CLIENT_ID'], 
-                oauth_callback_url = app.config['BASE_URL'] + '/callback'
+                oauth_callback_url = '/callback'
             )
         )
         res.headers.set('Referrer-Policy', 'no-referrer-when-downgrade')
@@ -292,8 +297,10 @@ def list_page():
     
 @app.route('/upload', methods=['GET'])
 def upload_page():
-    if get_upload_permission(get_userid_by_email(session.get('user').get('email'))):
+    # if get_upload_permission(get_userid_by_email(session['user']['email'])):
+    if session['user'] is not None and not (session['user']['user_type'] == 'STUDENT' and user_has_pending_submission(session['user']['email'])):
         return render_template('upload.html', title='Upload', user=session.get('user'))
+    session['pendingUpload'] = True
     return redirect('/')
 
 @app.route('/research_paper/<pdf_name>')
@@ -310,13 +317,13 @@ def edit_favorites(pdfid):
     session['favorites'] = toggle_pdf_favorite(int(pdfid), session.get('userid'))
     return jsonify({ 'favorites' : session.get('favorites'), 'status' : 200 })
 
-@app.route('/api/pdf/<pdfid>', methods=['DELETE'])
-def delete_pdf_endpoint(pdfid):
-    if get_delete_permission(session.get('userid')):
-        pdf_name = get_pdf_name_by_id(pdfid)
-        # delete_from_db(pdf_name)
-        return jsonify({ 'status': 200, 'message': 'PDF {} successfully deleted from database.'.format(pdf_name)})
-    abort(403)
+# @app.route('/api/pdf/<pdfid>', methods=['DELETE'])
+# def delete_pdf_endpoint(pdfid):
+#     if get_delete_permission(session.get('userid')):
+#         pdf_name = get_pdf_name_by_id(pdfid)
+#         # delete_from_db(pdf_name)
+#         return jsonify({ 'status': 200, 'message': 'PDF {} successfully deleted from database.'.format(pdf_name)})
+#     abort(403)
 
 @app.route('/api/pdf/<pdfid>', methods=['PUT'])
 def edit_pdf_endpoint(pdfid):
@@ -376,7 +383,17 @@ def edit_user_type(userid, newUserType):
         'userType'      : userType,
     })
 
+@app.route('/api/pdf/<pdfid>', methods=['DELETE'])
+@app.route('/api/pdf/<pdfid>/status/<pdf_status>', methods=['PUT'])
+def edit_pdf_status(pdfid, pdf_status):
+    print(pdfid)
+    print(pdf_status)
+    set_pdf_status(pdfid, pdf_status)
 
+    return jsonify({
+        'status'        : 200,
+        'message'       : 'Successfully changed paper status.'
+    })
 
 
 # auth routes
@@ -409,11 +426,88 @@ def logout():
 # admin routes
 @app.route('/admin', methods=['GET'])
 @app.route('/admin/users', methods=['GET'])
-def user_page():
+def user_management_page():
     users = list_users()
     new_users = []
     for user in users:
         new_user = { **user, 'username': user.get('email')[:-10] }
         new_users.append(new_user)
     
-    return render_template('admin.html', title="Admin", users = new_users, user=session.get('user'))
+    return render_template('users.html', title="User Management", users = new_users, user=session.get('user'))
+
+@app.route('/admin/pdfs', methods=['GET'])
+def pdf_management_page():
+    submitted_pdfs = get_pdfs_by_status('SUBMITTED')
+    return render_template('/pdfs.html', title="TR Management", pdfs=submitted_pdfs, user = session.get('user'))
+
+
+
+@app.route('/upload', methods=['POST'])
+def uploading_page():
+    try:
+        data = request.form.to_dict()
+
+        uploaded_file = request.files['file']
+        file_name = uploaded_file.filename
+
+        if not file_name:
+            return "No file ?"
+        
+        file_name = str(int(time())) + "_" + secure_filename(file_name)
+        pdf_path = f'./app/static/pdf/{file_name}'
+        uploaded_file.save(pdf_path) #temporary save
+
+        # # check if the hash all ready exists in the db
+        # if pdf_allready_exists(file_name):
+        #     #remove the pdf from the directory
+        #     remove(pdf_path)
+        #     return "This pdf allready exist in the database... <a href='/search'>search</a>."        
+
+
+        # print(data)
+        # print(session['userid'])
+        # print(session['user'])
+
+        data['name'] = file_name
+        data['uploaded_by'] = session['user']['email']
+
+         # "File temporary uploaded... processing it before adding it to database...</br>"
+
+        counter = None
+        try:
+            #adding the file name to the text for searching by file name...
+            #norm_filnam = normalize_txt(file_name.replace('_', ' ').replace('.', ' ').replace('-', ' '))
+            #txt = read_as_txt(pdf_path) + " " + norm_filnam
+            # txt = read_as_txt(pdf_path) + " " + title + " " + authors + " " + year + " " + month
+            txt = data['abstract'] + " " + data['index_terms'] + " " + data['title'] + " " + data['authors'] + " " + data['year'] + " " + data['month']
+            txt_arr = txt.split(' ')
+            txt = ""
+            for word in txt_arr:
+                txt = txt + " " + word.strip(',.')
+
+            if not txt:
+                remove(pdf_path)
+                return "We cann't extract nothing from this pdf... <a href='/search'>search</a>."
+
+            counter = get_word_cout(txt)
+
+        except:
+            remove(pdf_path)
+            print(traceback.format_exc())
+            return "This is not a pdf... <a href='/search'>search</a>." 
+
+        pdfid = insert_pdf(data) #add the pdf to the database 
+        print(pdfid)
+        total_words = sum(counter.values())
+        for word in counter: #update the words in database
+            insert_word_to_db(pdfid, word, counter[word] / float(total_words))
+
+        return jsonify({
+            'status'        : 200,
+            'message'       : 'Succesfully submitted paper'
+        })
+        # return redirect('/')
+        # return "File {} successfully uploaded as  {}... <a href='/search'>search</a>.".format(uploaded_file.filename, str(pdfid))
+    except:
+        abort(408)
+        return "Fail to uploadi."

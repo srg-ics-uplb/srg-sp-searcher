@@ -87,6 +87,9 @@ body {
 
   background-color: var(--bg-color);
   color: var(--font-color);
+
+  display: flex;
+  flex-flow: column nowrap;
 }
 
 h1 *,
@@ -100,8 +103,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 main {
+  flex-grow: 1;
   width: min(90vw, 1600px);
   margin: 3em auto;
+}
+
+main > *:only-child {
+  grid-column: 1/-1;
 }
 
 main form {

@@ -157,3 +157,17 @@ def list_users():
       "user_type"         : row[6],
     })
   return users
+
+def get_user_names(users):
+  quoteWord = lambda word : "'" + word + "'"
+  sql = f"SELECT userid, given_name || ' ' || family_name FROM users WHERE userid IN ({', '.join(map(quoteWord, users))})" 
+  rows = db_execute(sql)
+  users = []
+  if rows and len(rows) > 0:
+    for row in rows:
+      users.append({
+        'id'        : row[0],
+        'name'      : row[1],
+      })
+
+  return users

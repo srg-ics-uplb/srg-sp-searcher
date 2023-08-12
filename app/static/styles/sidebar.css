@@ -1,0 +1,24 @@
+
+@media only screen and (min-width: 768px) {
+
+  #links.sidebar {
+    padding: .5em;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1em;
+  }
+  
+  main {
+    display: grid;
+    grid-template-columns: 25% 75%;
+    gap: 2em;
+  }
+
+  main table {
+    height: fit-content;
+  }
+
+  main table td {
+    height: fit-content;
+  }
+}

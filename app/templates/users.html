@@ -3,6 +3,9 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block main %}
+
+{% include 'sidebar.html' %}
+
 <table rules="all" id="users-tbl">
   <thead>
     <th>Email</th>
@@ -42,6 +45,9 @@
     {% endfor %}
   </tbody>
 </table>
+{% endblock %}
+
+{% block script %}
 
 <script>
   let users = {{ users| tojson | safe }};
@@ -49,6 +55,8 @@
   document.getElementsByName('type').forEach( elem => {
     let userid = elem.getAttribute('data-userid');
     let user = users.filter(user => user.id === userid)[0];
+
+    elem.value = user['user_type']
 
     elem.addEventListener('change', ev => {
       ev.preventDefault();

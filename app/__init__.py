@@ -4,6 +4,10 @@ import json
 
 app = Flask(__name__)
 
+import logging
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 # app.config.from_pyfile('creds.py')
 app.config.from_pyfile('configs.py')
 
