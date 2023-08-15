@@ -70,6 +70,7 @@ def get_most_recents(limit=3, page=0):
   return pdfs, end_time - start_time, next_button #pdfs list, time took to process and False for telling to not display a "next button"
 
 def get_pdfs_by_ids(pdfid_list,limit=5,page=0):
+  print(pdfid_list)
   pdfs = []
   start_time = time()
 
@@ -77,18 +78,20 @@ def get_pdfs_by_ids(pdfid_list,limit=5,page=0):
     pdfid_page = pdfid_list
     if limit != 0:
       pdfid_page = [pdfid_list[i * limit:(i + 1) * limit] for i in range((len(pdfid_list) + limit - 1) // limit )][page]
+    print(pdfid_page)
 
     if len(pdfid_page):
       for pdfid in pdfid_page:
-        sql = """
-            SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
+        print(pdfid)
+        sql = f"""
+            SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT, status
             FROM PDF
-            WHERE ID = ({})
+            WHERE ID = '{pdfid}'
             AND status = (SELECT id FROM pdf_status WHERE name = 'APPROVED')
-        """.format(
-            pdfid
-        )
+        """
         data = db_execute(sql)
+
+        print(data)
 
         for row in data:
           pdfs.append({
@@ -99,12 +102,16 @@ def get_pdfs_by_ids(pdfid_list,limit=5,page=0):
               "authors"   : row[4],
               "year"      : row[5],
               "month"     : row[6],
-              "abstract"  : row[7]
+              "abstract"  : row[7],
+              "status"    : row[8]
           })  
       
   end_time = time()
 
   next_button = set_next_button(len(pdfid_list), page+1, limit)
+
+  print('haha')
+  print(pdfs)
 
   return pdfs, end_time - start_time, next_button
 
@@ -125,7 +132,7 @@ def get_pdf_name_by_id(pdfid):
 def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
   pdfs = []
   sql = """
-        SELECT A.PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
+        SELECT A.PDF_ID, NAME, DATE, WORD, SUM(W_FREQ * LOG(TIDF)) * COUNT(WORD) AS SCORE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT, STATUS
         FROM (SELECT PDF_ID, WORD, W_FREQ
               FROM FREQ
               WHERE WORD IN ({})) A
@@ -134,9 +141,9 @@ def get_pdfs_by_words(nb_pdf, ws, page=0, nb_max_by_pages=8, nb_min_pdfs=8):
               FROM FREQ WHERE W2 IN ({})
               GROUP BY W2) B ON A.WORD = B.W2
           INNER JOIN
-             (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT
+             (SELECT ID, NAME, DATE, TITLE, AUTHORS, YEAR, MONTH, ABSTRACT, STATUS
               FROM PDF) C ON A.PDF_ID = C.ID
-        WHERE status = (SELECT id FROM pdf_status WHERE name = 'APPROVED')
+        WHERE STATUS = (SELECT id FROM pdf_status WHERE name = 'APPROVED')
         GROUP BY A.PDF_ID
         ORDER BY SCORE DESC
         LIMIT {} OFFSET {}

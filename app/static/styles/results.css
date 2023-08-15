@@ -93,7 +93,7 @@
   line-height: 17px;
   font-style: normal;
   font-weight: normal;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
 .result__description {

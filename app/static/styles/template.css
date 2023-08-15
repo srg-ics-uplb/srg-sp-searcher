@@ -112,32 +112,32 @@ main > *:only-child {
   grid-column: 1/-1;
 }
 
-main form {
-  width: min(800px, 90%);
+.upload form {
+  width: min(1600px, 90%);
   margin: 0 auto;
-  padding: 2em;
   display: grid;
   grid-template-columns: 1fr;
   gap: 1em;
 }
 
-main form div {
+.upload form div {
   display: flex;
   flex-flow: column nowrap;
   gap: .5em;
 }
 
-main form .radio-container {
+.upload form .radio-container {
   all: unset;
 }
 
-main form input,
-main form select,
-main form option {
+.upload form input,
+.upload form select,
+.upload form option {
+  width: 100%;
   padding: .5em 1em;
 }
 
-main form input[type="submit"] {
+.upload form input[type="submit"] {
   all: unset;
   cursor: pointer;
   width: max-content;

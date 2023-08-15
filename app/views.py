@@ -250,6 +250,7 @@ def list_page():
     elif (request.path == '/favorites'):
         title = 'Favorites'
         rows, speed, next_button = get_favorites(session['userid'], page=page)
+        print(rows)
     else:
         title = 'Home'
         rows, speed, next_button = get_recents(page=page)

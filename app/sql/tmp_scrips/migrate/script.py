@@ -73,25 +73,26 @@ def run():
             new_pdf[column] = row[column]
           else:
             new_pdf['metadata'][column] = row[column]
-        new_pdf['STATUS'] = 1
+        new_pdf['STATUS'] = 2
         new_db[table]['rows'].append(new_pdf)
 
   conn = sqlite3.connect('./new/pdf.db')
 
   # insert pdfs and word frequency in dictionary new_db into database
   for table in new_db:
-    for row in new_db[table]['rows']:
-      row_columns = []
-      row_values = []
+    if table in old_db.keys():
+      for row in new_db[table]['rows']:
+        row_columns = []
+        row_values = []
 
-      for column in new_db[table]['columns']:
-        if column in row.keys() and row[column] is not None:
-          row_columns.append(column)
-          row_values.append(row[column])
+        for column in new_db[table]['columns']:
+          if column in row.keys() and row[column] is not None:
+            row_columns.append(column)
+            row_values.append(row[column])
 
-      sql = f"INSERT INTO {table} ({arr_to_str(row_columns)}) VALUES ({arr_to_str_w_quot(row_values)})"
-      conn.execute(sql)
-      conn.commit()
+        sql = f"INSERT INTO {table} ({arr_to_str(row_columns)}) VALUES ({arr_to_str_w_quot(row_values)})"
+        conn.execute(sql)
+        conn.commit()
 
   conn.close()
 
