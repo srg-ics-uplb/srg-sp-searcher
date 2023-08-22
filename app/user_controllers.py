@@ -120,8 +120,7 @@ def get_delete_permission(userid):
 def set_delete_permission(userid, permit):
   sql = "UPDATE USERS SET allow_delete = '{}' WHERE userid = '{}'".format(int(permit), userid)
   db_execute(sql)
-  data = get_delete_permission(userid)
-  return data
+  return get_delete_permission(userid)
 
 def get_upload_permission(userid):
   sql = "SELECT allow_upload FROM USERS WHERE userid = '{}'".format(userid)
@@ -131,19 +130,44 @@ def get_upload_permission(userid):
 def set_upload_permission(userid, permit):
   sql = "UPDATE USERS SET allow_upload = '{}' WHERE userid = '{}'".format(int(permit), userid)
   db_execute(sql)
-  data = get_upload_permission(userid)
+  return get_upload_permission(userid)
+
+def get_user_type(userid):
+  sql = f"SELECT user_type FROM users WHERE userid = '{userid}'"
+  data = db_execute(sql)[0]
   return data
+
+def set_user_type(userid, userType):
+  sql = f"UPDATE users SET user_type = '{userType}' WHERE userid = '{userid}'"
+  db_execute(sql)
+  return get_user_type(userid)
 
 
 def list_users():
   users = []
-  sql = "SELECT email, given_name, family_name, allow_upload, allow_delete FROM USERS"
+  sql = "SELECT email, given_name, family_name, allow_upload, allow_delete, userid, user_type FROM USERS"
   data = db_execute(sql)
   for row in data:
     users.append({
-      "email":          row[0],
-      "name":           "{} {}".format(row[1], row[2]),
-      "allow_upload":   row[3],
-      "allow_delete":   row[4]
+      "email"             : row[0],
+      "name"              : "{} {}".format(row[1], row[2]),
+      "allow_upload"      : row[3],
+      "allow_delete"      : row[4],
+      "id"                : row[5],
+      "user_type"         : row[6],
     })
+  return users
+
+def get_user_names(users):
+  quoteWord = lambda word : "'" + word + "'"
+  sql = f"SELECT userid, given_name || ' ' || family_name FROM users WHERE userid IN ({', '.join(map(quoteWord, users))})" 
+  rows = db_execute(sql)
+  users = []
+  if rows and len(rows) > 0:
+    for row in rows:
+      users.append({
+        'id'        : row[0],
+        'name'      : row[1],
+      })
+
   return users

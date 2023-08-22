@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main %}
+
+{% include 'sidebar.html' %}
+<style>
+  table#pdfs-tbl .upload_user,
+  table#pdfs-tbl .upload_date,
+  table#pdfs-tbl .actions {
+    white-space: nowrap;
+  }
+
+  table#pdfs-tbl .actions > a {
+    cursor: pointer;
+  }
+</style>
+
+<table rules="all" id="pdfs-tbl">
+  <thead>
+    <th>Title</th>
+    <th>Authors</th>
+    <th>Submitted By</th>
+    <th>Upload Date</th>
+    <th>Actions</th>
+  </thead>
+  <tbody>
+    {% for pdf in pdfs %}
+      <tr>
+        <td>{{ pdf['title'] }}</td>
+        <td>{{ pdf['authors'] }}</td>
+        <td class="upload_user">{{ pdf['uploaded_by'] }}</td>
+        <td class="upload_date">{{ pdf['date'] }}</td>
+        <td class="actions">
+          <a href="/research_paper/{{ pdf['name'] }}" target="_blank"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" stroke-width="4.4799999999999995" stroke="#000000" fill="none"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d="M55.4,32V53.58a1.81,1.81,0,0,1-1.82,1.82H10.42A1.81,1.81,0,0,1,8.6,53.58V10.42A1.81,1.81,0,0,1,10.42,8.6H32"></path><polyline points="40.32 8.6 55.4 8.6 55.4 24.18"></polyline><line x1="19.32" y1="45.72" x2="54.61" y2="8.91"></line></g></svg></a>
+          <a class="approve-btn" data-pdfid="{{ pdf['id'] }}"><svg viewBox="0 0 32 32" enable-background="new 0 0 32 32" id="Editable-line" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d=" M26.002,13H20V7.026C20,5.907,19.093,5,17.974,5c-0.615,0-1.198,0.28-1.582,0.76L9,15l0.001,0L9,15v10l3,2h12.473 c0.892,0,1.676-0.592,1.921-1.451l2.49-8.725C29.43,14.908,27.993,13,26.002,13z" fill="none" id="XMLID_5_" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"></path><rect fill="none" height="14" id="XMLID_3_" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" width="6" x="3" y="13"></rect><circle cx="6" cy="23" id="XMLID_4_" r="1"></circle></g></svg></a>
+          <a class="disapprove-btn" data-title="{{ pdf['title'] }}" data-pdfid="{{ pdf['id'] }}"><svg viewBox="0 0 32 32" enable-background="new 0 0 32 32" id="Editable-line" version="1.1" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" fill="#000000"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path d=" M5.998,19H12v5.974C12,26.093,12.907,27,14.026,27c0.615,0,1.198-0.28,1.582-0.76L23,17l-0.001,0L23,17V7l-3-2H7.527 C6.636,5,5.852,5.592,5.607,6.451l-2.49,8.725C2.57,17.092,4.007,19,5.998,19z" fill="none" id="XMLID_21_" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2"></path><rect fill="none" height="14" id="XMLID_20_" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2" transform="matrix(-1 -8.988867e-11 8.988867e-11 -1 52 24)" width="6" x="23" y="5"></rect><circle cx="26" cy="9" id="XMLID_19_" r="1"></circle></g></svg></a>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block script %}
+<script>
+  document.querySelectorAll('.approve-btn').forEach( btn => {
+    btn.addEventListener('click', ev => {
+      let tableRow = ev.currentTarget.parentNode.parentNode;
+      fetch(`/api/pdf/${ev.currentTarget.getAttribute('data-pdfid')}/status/APPROVED`, {
+        method: 'PUT'
+      })
+        .then( res => res.json())
+        .then( data => {
+          console.log(data);
+          tableRow.remove();
+        })
+        .catch( err => {
+          console.error(err) 
+        })
+    })
+  })
+
+  document.querySelectorAll('.disapprove-btn').forEach( btn => {
+    btn.addEventListener('click', ev => {
+      let tableRow = ev.currentTarget.parentNode.parentNode;
+      if (confirm(`Are you sure you want to delete, ${ev.currentTarget.getAttribute('data-title')}?`))
+        fetch(`/api/pdf/${ev.currentTarget.getAttribute('data-pdfid')}/status/REMOVED`, {
+          method: 'PUT'
+        })
+          .then( res => res.json())
+          .then( data => {
+            console.log(data);
+            tableRow.remove();
+          })
+          .catch( err => {
+            console.error(err) 
+          })
+    })
+  })
+</script>
+{% endblock %}

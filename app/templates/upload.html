@@ -4,7 +4,7 @@
 
 {% block main %}
 <div class="upload">
-  <form enctype="multipart/form-data">
+  <form enctype="multipart/form-data" action="/upload" method="post" id="upload">
     <label for="title">Title:</label>
     <input type="text" id="title" name="title" required minlength="4" maxlength="200" size="55" placeholder="Title">
 
@@ -40,7 +40,34 @@
     <label for="file">Upload PDF</label>
     <input type="file" id="file" accept="application/pdf" name="file" multiple>
     
-    <input type="submit" class="search" value="Upload" formmethod="post" formaction="">
+    <input type="submit" class="search" value="Upload">
   </form>
 </div>
+{% endblock %}
+
+{% block script%}
+<script>
+  let sanitizeText = txt => (txt.replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\\/g, '&#92;').replace(/'/g, '&apos;'));
+  document.getElementById('upload').addEventListener('submit', ev => {
+    ev.preventDefault();
+
+    let formData = new FormData();
+    formData.append('title', sanitizeText(document.getElementById('title').value))
+    formData.append('authors', sanitizeText(document.getElementById('authors').value))
+    formData.append('abstract', sanitizeText(document.getElementById('abstract').value))
+    formData.append('index_terms', sanitizeText(document.getElementById('index_terms').value))
+    formData.append('year', sanitizeText(document.getElementById('year').value))
+    formData.append('month', sanitizeText(document.getElementById('month').value))
+    formData.append('file', document.getElementById('file').files[0])
+
+    fetch(`/upload`, {
+      method: 'POST',
+      body: formData,
+    })
+      .then(() => window.location = '/')
+      .catch( err => console.error(err))
+
+    console.log(formData)
+  })
+</script>
 {% endblock %}

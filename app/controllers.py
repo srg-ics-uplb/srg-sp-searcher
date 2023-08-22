@@ -1,3 +1,5 @@
+from flask import session
+
 import re
 import math
 import hashlib
@@ -23,7 +25,6 @@ import sys
 
 from . user_controllers import *
 from . pdf_controllers import *
-
 
 from nltk import PorterStemmer
 
@@ -203,3 +204,62 @@ def toggle_pdf_favorite(pdfid, userid):
     update_user_favorites(userid=userid, favorites=favorites)
     favorites =  get_user_favorites(userid)
     return favorites
+
+
+
+
+
+
+
+def insert_pdf(pdf):
+    # insert a pdf into the database and return his id
+
+    path = app.config['PDF_DIR_LOC'] + app.config['PDF_DIR'] + pdf['name']
+    sql = f"""
+INSERT INTO pdf
+(
+name, 
+hash, 
+date, 
+title, 
+authors, 
+year, 
+month, 
+abstract, 
+index_terms, 
+uploaded_by, 
+status
+) VALUES (
+'{pdf['name']}',
+'{hash_file(path)}',
+'{int(time())}',
+'{pdf['title']}',
+'{pdf['authors']}',
+'{pdf['year']}',
+'{pdf['month']}',
+'{pdf['abstract']}',
+'{pdf['index_terms']}',
+'{pdf['uploaded_by']}',
+(SELECT id FROM pdf_status WHERE name = 'SUBMITTED')
+)
+"""
+    print(sql)
+    pdfid = None
+
+    with conn_to_db('pdf.db') as conn:
+        try:
+            # conn = conn_to_db('pdf.db')
+            cursor = conn.execute(sql)
+            pdfid = cursor.lastrowid
+            activity = f"{pdf['uploaded_by']} submitted pdf#{pdfid}"
+            sql = f"INSERT INTO LOGS (userid, pdfid, activity) VALUES ('{session['userid']}','{pdfid}','{activity}')"
+            cursor = conn.execute(sql)
+            conn.commit()
+            print(cursor.lastrowid)
+        except sqlite3.Error as e:
+            conn.rollback()
+            print(e)
+        finally:
+            conn.close()
+    
+    return pdfid

@@ -1,26 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %} {% endblock %} | UPLB ICS Peak One</title>
-  <style>{% block style %} {% endblock %}</style>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
 
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/search.css') }}">
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/results.css') }}">
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/template.css') }}">
-  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/table.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/template.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/search.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/results.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/header.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/sidebar.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/footer.css') }}">
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/table.css') }}">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+  {% block style %} {% endblock %}
 </head>
+
 <body>
   {% if not user %}
   <div id="g_id_onload"
-      data-client_id="{{ client_id }}"
-      data-login_uri="{{ oauth_callback_url }}">
+    data-client_id="696707186269-vusumn77j1l0gur6ulkkf1orgvskinok.apps.googleusercontent.com"
+    data-login_uri="/callback">
   </div>
   {% endif %}
-
   {% include 'header.html' %}
 
   <main>
@@ -29,10 +35,7 @@
 
   {% include 'footer.html' %}
 
-  <script>
-    document.querySelector('#profile').addEventListener('click', () => {
-      document.querySelector('#nav').classList.toggle('hidden')
-    })
-  </script>
+  {% block script %} {%endblock%}
 </body>
+
 </html>

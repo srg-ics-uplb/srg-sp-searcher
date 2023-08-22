@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block main %}
+
+{% include 'sidebar.html' %}
+
+<table rules="all" id="users-tbl">
+  <thead>
+    <th>Email</th>
+    <th>Name</th>
+    <th>User Type</th>
+    <th>Upload</th>
+    <th>Delete</th>
+  </thead>
+  <tbody>
+    {% for user in users %}
+    {% set username = user['email'] %}
+    <tr>
+      <td>{{ user['email'] }}</td>
+      <td>{{ user.get('name') }}</td>
+      <td>
+        <select name="type" id="{{ user.get('username') }}-type" data-userid="{{ user['id'] }}">
+          <option value="ADMIN">Admin</option>
+          <option value="FACULTY">Faculty</option>
+          <option value="STUDENT">Student</option>
+        </select>
+      </td>
+      <td><button class="upload-btn" id="{{ user.get('username') }}-upload">
+          {% if user.get('allow_upload') == 0 %}
+          Not Allowed
+          {% elif user.get('allow_upload') == 1 %}
+          Allowed
+          {% endif %}
+        </button></td>
+      <td><button class="delete-btn" id="{{ user.get('username') }}-delete">
+          {% if user.get('allow_delete') == 0 %}
+          Not Allowed
+          {% elif user.get('allow_delete') == 1 %}
+          Allowed
+          {% endif %}
+        </button></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block script %}
+
+<script>
+  let users = {{ users| tojson | safe }};
+
+  document.getElementsByName('type').forEach( elem => {
+    let userid = elem.getAttribute('data-userid');
+    let user = users.filter(user => user.id === userid)[0];
+
+    elem.value = user['user_type']
+
+    elem.addEventListener('change', ev => {
+      ev.preventDefault();
+
+      let newUserType = elem.value;
+      let newUserTypeOption = Array.from(elem.children).filter( option => option.value == newUserType )[0];
+
+      let loadingOption = document.createElement('option');
+      loadingOption.textContent = 'Loading ...';
+      loadingOption.selected = true;
+
+      elem.appendChild(loadingOption);
+
+      fetch(`/api/user/${userid}/userType/${newUserType}`, {
+        method: 'PUT'
+      })
+        .then( response => response.json())
+        .then( data => {
+          newUserTypeOption.selected = true;
+        })
+        .catch( err => {
+          let oldUserTypeOption = Array.from(elem.children).filter( option => option.value == user.user_type )[0];
+          oldUserTypeOption.selected = true;
+        })
+        .finally(() => loadingOption.remove())
+    })
+  })
+
+  document.querySelectorAll(`.delete-btn`).forEach(btn => {
+    let username = btn.id.slice(0, -7);
+    let user = users.filter(user => user.username === username)[0];
+
+    btn.style.backgroundColor = user['allow_delete'] ? 'green' : 'red';
+
+    btn.addEventListener('click', ev => {
+      ev.preventDefault();
+      let defaultTxt = btn.textContent;
+      btn.textContent = 'Loading...';
+      fetch(`/api/user/${username}/delete-permit`, {
+        method: 'PUT'
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          updatePermit(btn, data.deletePermit)
+        })
+        .catch(err => {
+          console.log(err)
+          btn.textContent = defaultTxt;
+        })
+    })
+  })
+
+  document.querySelectorAll(`.upload-btn`).forEach(btn => {
+    let username = btn.id.slice(0, -7);
+    let user = users.filter(user => user.username === username)[0];
+
+    btn.style.backgroundColor = user['allow_upload'] ? 'green' : 'red';
+
+    btn.addEventListener('click', ev => {
+      ev.preventDefault();
+      let defaultTxt = btn.txtContent;
+      btn.textContent = 'Loading...';
+      fetch(`/api/user/${username}/upload-permit`, {
+        method: 'PUT'
+      })
+        .then(response => response.json())
+        .then(data => {
+          updatePermit(btn, data.uploadPermit)
+        })
+        .catch(err => {
+          console.log(err)
+          btn.textContent = defaultTxt;
+        })
+    })
+  })
+
+  function updatePermit(elem, permit) {
+    elem.textContent = permit
+      ? 'Allowed'
+      : 'Not Allowed';
+    elem.style.backgroundColor = permit
+      ? 'green'
+      : 'red';
+  }
+</script>
+{% endblock %}
