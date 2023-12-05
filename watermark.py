@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 
+"""
+Requirements:
+(1) sudo apt install pdftk -y
+(2) pip3 install reportlab
+(3) create a directory name "marked"
+
+Sample usage: python3 watermark.py email@up.edu.ph
+"""
+
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.units import cm, inch
 import datetime 
