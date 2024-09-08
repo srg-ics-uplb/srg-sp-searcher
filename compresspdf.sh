@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#compress when size is greater than 5MB
+
 TARGET=$1
 TARGET=${TARGET%%.pdf}
 
