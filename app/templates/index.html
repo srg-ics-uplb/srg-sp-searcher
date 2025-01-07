@@ -3,6 +3,12 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block main %}
+    
+  <form action="/search" method="GET" id="search-form">
+    <input type="text" id="s" name="s" placeholder="Maximum of 5 words" required>
+    <button type="submit" >Search</button>
+  </form>
+
   {% if user_request%}
     <h2>
       Results for:
