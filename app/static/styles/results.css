@@ -1,19 +1,54 @@
-/* inspired by : http://codepen.io/jackbrewer/pen/XdBbWw?editors=1100 */
+.hidden {
+  display: none;
+}
 
-/*body {
-  background-color: #fefbf3;
-}*/
-
-/* main h1 {
-  color: #706778; 
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  font-family: 'Helvetica', Arial, sans-serif;
-  margin-top: 10px;
-  margin-left: 10px;
+/* main * {
+  outline: 1px solid red;
 } */
 
-.hidden {
+#index-content {
+  width: 100%;
+  margin: 0 auto;
+
+  grid-column: 1/-1;
+  
+  display: flex;
+  gap: 2em;
+}
+
+#tr-container {
+  flex-basis: 1 1 100%;
+  width: 100%;
+}
+
+#search-form {
+  width: min(900px, 90%);
+  display: flex;
+  gap: 0;
+  padding: 0;
+  margin: 0 auto 2em;
+}
+
+#search-form * {
+  margin: 0;
+  padding: .5em 1em;
+}
+
+#search-form input {
+  flex-grow: 1;
+}
+
+#search-form button[type="submit"] {
+  all: unset;
+  cursor: pointer;
+  border: 1px solid black;
+  padding: .5em 1em;
+  font-weight: 900;
+}
+
+#favorites-container {
+  flex-basis: 0 1 25%;
+  width: 25%;
   display: none;
 }
 
@@ -21,15 +56,6 @@
   text-transform: uppercase;
   text-align: center;
   margin: 10px;
-}
-
-.words-results {
-  width: 90%;
-/*  text-transform: lowercase; */
-}
-
-.div-res {
-  overflow: scroll;
 }
 
 .result {
@@ -43,22 +69,17 @@
   border-color: rgba(0,0,0,0.07);
   border-style: solid;
   border-width: 1px 0;
-  overflow: hidden;
-  overflow-wrap: break-word;
 }
 
 .result__title {
   text-overflow: ellipsis;
   overflow: hidden;
-  white-space: nowrap;
   color: #1a0dab;
   font-size: 1.5em;
-  line-height: 1;
+  line-height: 1.2;
   font-weight: bold;
   text-decoration: none;
-  white-space: nowrap;
   cursor: pointer;
-  overflow-wrap: break-word;
 }
 
 .result__title:visited {
@@ -72,7 +93,7 @@
   line-height: 17px;
   font-style: normal;
   font-weight: normal;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
 .result__description {
@@ -83,3 +104,47 @@
   overflow: hidden;
 }
 
+.delete-link,
+.favorite-link {
+  cursor: pointer;
+}
+
+.result a {
+  font-weight: bold;
+}
+
+.result a:hover {
+  text-decoration: underline;
+}
+
+#favorites-container > * {
+  width: 100%;
+}
+
+#profile {
+  height: 3em;
+  margin-bottom: 1em;
+
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1em;
+}
+
+#profile img {
+  height: 100%;
+  border-radius: 50%;
+}
+
+@media only screen and (min-width: 768px) {
+  
+  #tr-container:not(:only-child) {
+    width: 75%;
+  }
+
+  #favorites-container {
+    display: block;
+  }
+
+}
